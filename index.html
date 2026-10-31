@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meu Fichário Pokémon</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3efe8;--fg:#1d1b20;--mut:#6b6670;--cover:#c8312b;--page:#fffdf8;--slot:#ece7dd;--line:#d8d1c3;--acc:#2a5bd7;--ok:#1f9d55}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17161a;--fg:#f1eee8;--mut:#a39eab;--cover:#8f1f1b;--page:#25232a;--slot:#1c1b20;--line:#38353f;--acc:#7da2ff;--ok:#4cd187}}
+:root[data-theme="dark"]{--bg:#17161a;--fg:#f1eee8;--mut:#a39eab;--cover:#8f1f1b;--page:#25232a;--slot:#1c1b20;--line:#38353f;--acc:#7da2ff;--ok:#4cd187}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:14px}
+h1{font-size:1.25rem;margin:0}
+.top,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.top{justify-content:space-between}.row{margin:10px 0}
+select,button,input,textarea{font:inherit;color:var(--fg);background:var(--page);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+button{cursor:pointer}button.p{background:var(--acc);color:#fff;border-color:var(--acc)}
+button:disabled{opacity:.4;cursor:default}
+.bar{height:12px;background:var(--line);border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#7be0a5);width:0;transition:width .5s}
+.stat{display:flex;justify-content:space-between;color:var(--mut);font-size:.9rem;margin-bottom:4px}
+.chip.on{background:var(--fg);color:var(--bg)}
+#q{flex:1;min-width:140px}
+.binder{background:var(--cover);border-radius:16px;padding:12px;display:flex;gap:4px;box-shadow:0 8px 24px #0004;perspective:1200px;touch-action:pan-y}
+.pg{flex:1;background:var(--page);border-radius:8px;padding:10px;display:grid;grid-template-columns:repeat(var(--c),1fr);gap:8px;align-content:start;min-width:0}
+.binder.go .pg{animation:in .3s ease-out}
+@keyframes in{from{opacity:0;transform:translateX(var(--dx,20px))}to{opacity:1;transform:none}}
+.slot{aspect-ratio:5/7;border-radius:8px;background:var(--slot);border:1px dashed var(--line);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;user-select:none;transition:transform .15s,opacity .2s,box-shadow .2s}
+.slot .n{font-weight:700;color:var(--mut);font-size:1.1rem}
+.slot:focus-visible{outline:3px solid var(--acc)}
+.slot.have{border:2px solid #fff9;background:linear-gradient(145deg,var(--g1),var(--g2));box-shadow:0 3px 8px #0004;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transform-style:preserve-3d;animation:pop .35s}
+@keyframes pop{0%{transform:scale(.8) rotate(-4deg)}60%{transform:scale(1.06)}}
+.slot.have:hover{box-shadow:0 8px 18px #0006;z-index:2}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slot.have::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,0%),#fff8,transparent 55%);mix-blend-mode:soft-light;pointer-events:none}
+.slot .tag{position:absolute;left:0;right:0;bottom:0;padding:14px 4px 3px;background:linear-gradient(transparent,#000b);color:#fff;font-size:.68rem;line-height:1.15;text-align:center;z-index:1}
+.slot .no{position:absolute;top:3px;left:5px;font-size:.7rem;font-weight:700;color:#fff;text-shadow:0 1px 3px #000;z-index:1}
+.slot .st{position:absolute;top:3px;right:5px;font-size:.7rem;color:#ffd84a;text-shadow:0 1px 3px #000;z-index:1}
+.slot.nm .tag{display:none}
+.slot.dim{opacity:.15}.slot.hit{outline:3px solid var(--acc);outline-offset:-3px}
+.slot.off{visibility:hidden}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--page);color:var(--fg);max-width:440px;width:calc(100% - 28px);padding:16px;max-height:90vh}
+dialog::backdrop{background:#0008}
+dialog label{display:block;margin:10px 0 4px;color:var(--mut);font-size:.9rem}
+dialog input:not([type=checkbox]),dialog select,dialog textarea{width:100%}
+textarea{font-size:.8rem;min-height:80px;background:var(--bg)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.danger{color:#d33}
+.ph{display:flex;gap:10px;align-items:center}
+.pv{width:70px;aspect-ratio:5/7;border-radius:6px;background:var(--slot) center/cover;border:1px solid var(--line);flex:none}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:20px;opacity:0;transition:.3s;pointer-events:none;z-index:9}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+a{color:var(--acc)}
+.sr{display:flex;gap:8px;align-items:center;padding:6px;border:1px solid var(--line);border-radius:10px;margin-top:6px}
+.sr img{width:42px;aspect-ratio:5/7;object-fit:cover;border-radius:4px;flex:none}
+.sr input[type=number]{width:70px;flex:none}
+#sl{max-height:40vh;overflow:auto}
+body{font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:radial-gradient(circle at 15% 0,#ffcb0526,transparent 45%),radial-gradient(circle at 95% 8%,#3b4cca26,transparent 45%),var(--bg)}
+h1{display:flex;align-items:center;gap:8px;font-size:1.4rem}
+.ball{width:26px;height:26px;border-radius:50%;background:linear-gradient(#e5412d 0 44%,#222 44% 56%,#fff 56%);border:2px solid #222;position:relative;flex:none;animation:wob 4s infinite}
+.ball::after{content:'';position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px;background:#fff;border:2px solid #222;border-radius:50%}
+@keyframes wob{0%,90%,100%{transform:none}93%{transform:rotate(-18deg)}96%{transform:rotate(14deg)}}
+button{transition:transform .12s,box-shadow .12s}button:active:not(:disabled){transform:translateY(2px) scale(.97)}
+button.p{background:linear-gradient(135deg,#3b4cca,#6a7bff);border:0;box-shadow:0 3px 0 #1f2a85;color:#fff}
+.chip{border-radius:20px}
+#lvl{font-weight:600;color:var(--fg)}
+.bar{height:16px;position:relative;overflow:visible;border-radius:10px}
+.bar i{position:relative;border-radius:10px;min-width:16px;background:repeating-linear-gradient(45deg,#ffcb05 0 10px,#ffd93d 10px 20px);background-size:28px 28px;animation:mv 1.2s linear infinite}
+.bar i::after{content:'';position:absolute;right:-2px;top:-3px;width:22px;height:22px;border-radius:50%;background:linear-gradient(#e5412d 0 44%,#222 44% 56%,#fff 56%);border:2px solid #222}
+@keyframes mv{to{background-position:28px 0}}
+.binder{position:relative;background:linear-gradient(145deg,#d93a32,#a7211c 60%,#8f1b17);padding:16px;border-radius:18px;box-shadow:0 14px 30px #0006,inset 0 2px 0 #ffffff40,inset 0 -3px 0 #0003}
+.binder::after{content:'';position:absolute;inset:6px;border:2px dashed #ffffff55;border-radius:13px;pointer-events:none}
+@media(min-width:700px){.binder{gap:34px;padding:22px}.binder::before{content:'';position:absolute;left:50%;top:6%;bottom:6%;width:30px;transform:translateX(-50%);z-index:5;pointer-events:none;background:radial-gradient(circle,#f4f4f8 0 5px,#8a8a99 6px 8px,#3b3b46 9px 11px,transparent 12px) center top/30px 74px repeat-y}}
+.pg{background:linear-gradient(#fffdf8,#f6f0e3);box-shadow:inset 0 0 0 1px #0001,0 2px 6px #0004;border-radius:6px;padding:12px;gap:10px}
+@media(prefers-color-scheme:dark){:root:not([data-theme='light']) .pg{background:linear-gradient(#2b2931,#222027)}}
+.slot{border-radius:7px;border:1px solid #00000022;background:linear-gradient(160deg,#ffffff55,#0000000d),var(--slot);box-shadow:inset 0 2px 5px #0002}
+.slot::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(115deg,transparent 38%,#ffffff3d 47%,transparent 56%)}
+.slot:not(.have):hover{transform:translateY(-3px)}
+.slot:not(.have) .n{position:relative;z-index:1;opacity:.55}
+.slot:not(.have)::after{content:'';position:absolute;width:52%;aspect-ratio:1;border-radius:50%;background:linear-gradient(#e5412d40 0 44%,#0003 44% 56%,#fff5 56%);border:2px solid #0002}
+.slot.have{border:2px solid #ffffffaa}
+.nav button{border-radius:50%;width:46px;height:46px;font-size:1.1rem;padding:0}
+#pgi{background:var(--page);padding:4px 14px;border-radius:20px;border:1px solid var(--line)}
+.cf{position:fixed;top:-30px;z-index:20;pointer-events:none;font-size:22px;animation:fall 2.4s ease-in forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.2}}
+.bd{font-size:.65rem;padding:2px 6px;border-radius:8px;background:var(--line);white-space:nowrap}
+.sh .wrap>:not(.top):not(#shelf):not(#shl){display:none}
+#shelf,#shl{display:none}.sh #shl{display:block;color:var(--mut);margin:14px 0 0}
+.sh #shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px;margin-top:16px}
+.sh #back,.sh #bt,.sh #sel,.sh #scan,.sh #data{display:none!important}
+body:not(.sh) #new{display:none}
+#bt{max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bk{position:relative;aspect-ratio:3/4;border-radius:6px 14px 14px 6px;background:linear-gradient(145deg,color-mix(in srgb,var(--cv) 80%,#fff),var(--cv) 55%,color-mix(in srgb,var(--cv) 70%,#000));box-shadow:0 8px 16px #0005,inset 0 2px 0 #fff4;cursor:pointer;display:flex;align-items:flex-end;padding:10px 10px 14px 28px;transition:transform .2s;color:#1d1b20}
+.bk::before{content:'';position:absolute;left:0;top:0;bottom:0;width:18px;border-radius:6px 0 0 6px;background:radial-gradient(circle,#f4f4f8 0 3px,#8a8a99 4px 5px,transparent 6px) center top/18px 38px repeat-y,#0003}
+.bk:hover,.bk:focus-visible{transform:translateY(-6px) rotate(-1deg)}
+.bk .lb{background:#fffdf6;border-radius:8px;padding:8px;width:100%;box-shadow:0 2px 4px #0003;display:flex;flex-direction:column;gap:2px;font-size:.95rem}
+.bk .lb b{line-height:1.15;word-break:break-word}.bk .lb small{color:#6b6670}
+.bk .lb i{display:block;height:6px;border-radius:4px;background:linear-gradient(90deg,#ffcb05 var(--w),#0002 var(--w))}
+.bk .ed{position:absolute;top:8px;right:8px;width:32px;height:32px;padding:0;border-radius:50%;background:#fffd;color:#1d1b20}
+.bk.add{background:transparent;border:3px dashed var(--line);box-shadow:none;color:var(--mut);flex-direction:column;align-items:center;justify-content:center;padding:10px;gap:6px;font-weight:600}
+.bk.add::before{display:none}.bk.add span{font-size:2.4rem;line-height:1}
+.swb{width:32px;height:32px;border-radius:50%;padding:0;border:3px solid transparent}.swb.on{border-color:var(--fg)}
+.ph2{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:1px;padding:20px 5px 6px;background:linear-gradient(transparent 25%,#0000004d);font-size:.62rem;line-height:1.15;text-align:center;z-index:1;color:#1d1b20}
+.ph2 b{font-size:.78rem;word-break:break-word}.ph2 span:nth-of-type(1){font-weight:700}
+.slot:not(.hi) .tag{display:none}
+.cn{position:absolute;bottom:4px;left:3px;right:3px;font-size:.58rem;text-align:center;color:var(--mut);line-height:1.1;word-break:break-word;z-index:1}
+#kt table{width:100%;border-collapse:collapse;font-size:.78rem}#kt td,#kt th{padding:3px 5px;border-bottom:1px solid var(--line);text-align:left}
+#kt{max-height:34vh;overflow:auto}
+#dt{max-width:640px}
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:8px;max-height:44vh;overflow:auto}
+.tc{display:flex;flex-direction:column;gap:3px;font-size:.75rem;text-align:center}
+.tc img,.tc .ni{width:100%;aspect-ratio:5/7;object-fit:cover;border-radius:6px;background:var(--slot)}
+.tc .ni{display:flex;align-items:center;justify-content:center;color:var(--mut)}
+.tc button{padding:4px 6px;font-size:.72rem;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1><span class="ball"></span> Meu Fichário Pokémon</h1>
+    <div class="row" style="margin:0">
+      <button id="back">← Estante</button><b id="bt"></b>
+      <select id="sel" hidden aria-label="Fichário"></select>
+      <button id="scan" class="p" hidden>📷 Escanear</button>
+      <button id="new" class="p">+ Fichário</button>
+      <button id="data" aria-label="Dados">⚙️</button>
+    </div>
+  </div>
+  <p id="shl">Sua estante: toque num fichário para abrir ou crie um novo para separar suas cartas.</p>
+  <div id="shelf"></div>
+  <div style="margin-top:14px">
+    <div class="stat"><span id="cnt"></span><span id="lvl"></span><span id="pct"></span></div>
+    <div class="bar"><i id="fill"></i></div>
+  </div>
+  <div class="row">
+    <input id="q" type="search" placeholder="Buscar nome ou ir ao nº…">
+    <button class="chip on" data-f="all">Todas</button>
+    <button class="chip" data-f="have">Tenho</button>
+    <button class="chip" data-f="miss">Faltam</button>
+    <button id="kbtn">📋 Catálogo</button>
+    <button id="tbtn" class="p">🔎 Buscar cartas</button>
+  </div>
+  <div class="row" style="margin-top:0"><label style="font-size:.9rem;color:var(--mut)"><input type="checkbox" id="quick" style="width:auto"> Toque rápido (marca/desmarca sem abrir)</label></div>
+  <div class="binder" id="binder"></div>
+  <div class="nav">
+    <button id="prev">◀</button>
+    <span id="pgi" style="color:var(--mut)"></span>
+    <button id="next">▶</button>
+  </div>
+  <p style="color:var(--mut);font-size:.85rem">Toque numa carta para registrar, adicionar foto, tipo e raridade. Deslize ou use as setas ◀ ▶ para virar a página.</p>
+  <p style="color:var(--mut);font-size:.75rem">Cartas buscadas usam dados e imagens do <a href="https://tcgdex.dev" target="_blank" rel="noopener noreferrer">TCGdex</a>. Site de fã, sem ligação com The Pokémon Company, Nintendo ou Game Freak.</p>
+</div>
+<div id="toast"></div>
+
+<dialog id="dc"><b id="dct"></b>
+  <label for="dcn">Nome</label><input id="dcn" placeholder="Ex.: Pikachu">
+  <label for="dcc2">Coleção / expansão</label><input id="dcc2">
+  <div class="row" style="margin:0"><div style="flex:1"><label for="dcty">Tipo</label><select id="dcty"></select></div>
+  <div style="flex:1"><label for="dcr">Raridade</label><select id="dcr"><option value="0">—</option><option value="1">★ Comum/Incomum</option><option value="2">★★ Rara/Holo</option><option value="3">★★★ Ultra/Secreta</option></select></div></div>
+  <label>Imagem: só foto sua. Sem foto, o fichário mostra os dados da carta.</label>
+  <div class="ph"><div class="pv" id="pv"></div>
+    <div class="btns" style="margin:0"><button id="fb">📷 Foto</button><button id="fx">Remover</button></div>
+    <input type="file" id="ff" accept="image/*" hidden></div>
+  <div class="btns"><button class="p" id="dcy">Tenho ✓</button><button id="dcx">Não tenho</button><button id="dcc">Fechar</button></div>
+  <p style="margin:12px 0 0;font-size:.85rem"><a id="lk" target="_blank" rel="noopener noreferrer">Ver esta carta no Google Imagens ↗</a></p>
+</dialog>
+
+<dialog id="ds"><b>📷 Escanear fichário</b>
+  <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Fotografe uma página do fichário por vez, de frente, reta e com boa luz. O Claude lê as cartas e preenche nome, tipo e número. As fotos são enviadas ao Claude só para essa leitura.</p>
+  <label for="sm">Como numerar as cartas</label>
+  <select id="sm"><option value="p">Pelo número impresso na carta (ex.: 025/165)</option><option value="o">Pela posição na página</option></select>
+  <div id="so" hidden><label for="s0">Número da primeira carta da primeira foto</label><input id="s0" type="number" min="1" value="1"></div>
+  <label for="sf">Fotos das páginas (várias, em ordem)</label>
+  <input type="file" id="sf" accept="image/*" multiple>
+  <div class="btns"><button class="p" id="sgo">Escanear</button><button id="sst" hidden>Parar</button><button id="sdc">Fechar</button></div>
+  <p id="sp" style="font-size:.85rem;color:var(--mut)"></p>
+  <progress id="spr" hidden style="width:100%"></progress><button id="sat" hidden style="margin-top:8px"></button>
+  <div id="sl"></div>
+  <div class="btns" id="sim" hidden><button class="p" id="sib">Importar</button></div>
+</dialog>
+
+<dialog id="dt"><b>🔎 Buscar cartas (TCGdex)</b>
+  <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Busque por nome, número e/ou coleção. As imagens vêm direto do TCGdex, sem cópia no seu site.</p>
+  <label for="tn">Nome</label><input id="tn" placeholder="Ex.: Pikachu">
+  <div class="row" style="margin:0"><div style="flex:1"><label for="tnum">Número</label><input id="tnum" placeholder="Ex.: 25"></div>
+  <div style="flex:2"><label for="tcol">Coleção</label><input id="tcol" list="tsets" placeholder="Digite para ver as coleções"></div></div>
+  <datalist id="tsets"></datalist>
+  <div class="btns"><button class="p" id="tgo">Buscar</button><button id="tcl">Fechar</button></div>
+  <p id="tst" style="font-size:.85rem;color:var(--mut)"></p>
+  <div class="tg" id="tg"></div>
+  <div class="btns" id="tmw" hidden><button id="tmore">Carregar mais</button></div>
+  <p style="font-size:.75rem;color:var(--mut)">Dados e imagens: <a href="https://tcgdex.dev" target="_blank" rel="noopener noreferrer">TCGdex</a>. Site de fã, sem ligação com The Pokémon Company, Nintendo ou Game Freak.</p>
+</dialog>
+
+<dialog id="dk"><b>📋 Catálogo do fichário</b>
+  <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Dados de cada carta (número, nome, coleção, raridade), guardados separados das imagens. Cole uma lista abaixo para preencher os nomes das cartas que faltam.</p>
+  <div id="kt"></div>
+  <label for="kj">Catálogo em texto (JSON, sem imagens)</label><textarea id="kj"></textarea>
+  <div class="btns"><button id="kcp">Copiar</button><button class="p" id="kim">Importar</button><button id="kcl">Fechar</button></div>
+</dialog>
+
+<dialog id="dn"><b id="dnt">Novo fichário</b>
+  <label for="nn">Nome</label><input id="nn" placeholder="Ex.: Escarlate e Violeta 151">
+  <label for="ncol">Coleção / expansão (opcional)</label><input id="ncol" placeholder="Ex.: Escarlate e Violeta 151">
+  <label for="nt">Total de cartas</label><input id="nt" type="number" min="1" max="1500" value="150">
+  <label for="np">Bolsos por página</label>
+  <select id="np"><option value="4">4 (2×2)</option><option value="9" selected>9 (3×3)</option><option value="12">12 (4×3)</option></select>
+  <label>Cor da capa</label><div class="row" id="sw" style="margin:0"></div>
+  <div class="btns"><button class="p" id="nok">Criar</button><button id="ncc">Cancelar</button><button class="danger" id="ndel" hidden>Apagar</button></div>
+</dialog>
+
+<dialog id="dd"><b>Dados</b>
+  <p style="font-size:.8rem;color:var(--mut)">As imagens vêm só das fotos que você mesmo tira. O site não copia imagens da internet.</p>
+  <label for="faltam">Cartas que faltam nesta coleção</label><textarea id="faltam" readonly></textarea>
+  <label for="bk">Backup de todas as coleções (com fotos). Copie e guarde; cole aqui para restaurar.</label><textarea id="bk"></textarea>
+  <div class="btns"><button id="cp">Copiar backup</button><button id="imp">Restaurar</button><button class="danger" id="del">Apagar coleção</button><button id="ddc">Fechar</button></div>
+</dialog>
+
+<script>
+const $=s=>document.querySelector(s);
+const TY={Normal:['#d8d4c6','#9c978a'],Fogo:['#ff9a5c','#e5412d'],Água:['#6ec1ff','#2a6fd6'],Planta:['#8be28b','#2e9b4e'],Elétrico:['#ffe66b','#f0b400'],Psíquico:['#f58cd3','#a43fbf'],Lutador:['#d98a5b','#9a4a28'],Sombrio:['#7d7a8f','#2f2c3d'],Metal:['#c9d3dd','#7f8ea0'],Dragão:['#9a8cff','#4a3fc4'],Fada:['#ffc0e0','#e76fb0']};
+$('#dcty').innerHTML='<option value="">—</option>'+Object.keys(TY).map(t=>`<option>${t}</option>`).join('');
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function norm(d){d.sets.forEach(s=>{for(const k in s.cards){const c=s.cards[k];if(typeof c!=='object'||!c)s.cards[k]={name:c||''}}});return d}
+function load(){try{const r=localStorage.getItem('fichario-pokemon');if(r){const d=JSON.parse(r);if(d&&d.sets&&d.sets.length)return norm(d)}}catch(e){}
+return{cur:0,sets:[{name:'Minha coleção',total:150,per:9,cards:{}}]}}
+function save(){try{localStorage.setItem('fichario-pokemon',JSON.stringify(S));return true}catch(e){toast('Armazenamento cheio: faça backup e remova algumas fotos');return false}}
+let S=load(),page=0,filt='all',q='',cur=null,img='',anim=0;
+const set=()=>S.sets[S.cur],wide=()=>innerWidth>=700;
+let tt;function toast(m){if(/completa|importadas/.test(m))confetti();const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
+function render(){
+  if(view==='shelf'){document.body.classList.add('sh');drawShelf();return}
+  document.body.classList.remove('sh');
+  const s=set(),per=s.per,pages=Math.ceil(s.total/per),step=wide()?2:1;$('#bt').textContent=s.name;
+  page=Math.max(0,Math.min(page,pages-1));page-=page%step;
+  $('#sel').innerHTML=S.sets.map((x,i)=>`<option value="${i}">${esc(x.name)}</option>`).join('');$('#sel').value=S.cur;
+  const have=Object.keys(s.cards).filter(k=>k<=s.total).length,p=Math.round(have/s.total*100);
+  $('#cnt').textContent=`${have} de ${s.total} · faltam ${s.total-have}`;$('#pct').textContent=p+'%';$('#lvl').textContent=p>=100?'👑 Mestre Pokémon':p>=75?'🔥 Elite dos Quatro':p>=50?'⚡ Líder de ginásio':p>=25?'🎒 Colecionador':p>0?'🌱 Treinador iniciante':'🥚 Treinador novato';$('#fill').style.width=p+'%';
+  const cols=per===4?2:per===9?3:4,ql=q.toLowerCase();let h='';
+  for(let pg=page;pg<page+step&&pg<pages;pg++){
+    h+=`<div class="pg" style="--c:${cols}">`;
+    for(let i=0;i<per;i++){
+      const n=pg*per+i+1;
+      if(n>s.total){h+='<div class="slot off"></div>';continue}
+      const c=s.cards[n],has=!!c;
+      const match=ql&&((c&&c.name&&c.name.toLowerCase().includes(ql))||String(n)===ql);
+      const dim=(filt==='have'&&!has)||(filt==='miss'&&has)||(ql&&!match&&!/^\d+$/.test(ql));
+      if(!has){h+=`<div class="slot${dim?' dim':''}${match?' hit':''}" data-n="${n}" tabindex="0" role="button" aria-label="Carta ${n}, faltando"><span class="n">${n}</span>${s.cat&&s.cat[n]&&s.cat[n].name?`<span class="cn">${esc(s.cat[n].name)}</span>`:''}</div>`;continue}
+      const g=TY[c.type]||['#ffe27a','#ff9a5c'];
+      h+=`<div class="slot have${c.img||c.url?' hi':''}${c.name||c.img?'':' nm'}${dim?' dim':''}${match?' hit':''}" data-n="${n}" tabindex="0" role="button" aria-label="Carta ${n}, ${esc(c.name||'sem nome')}" style="--g1:${g[0]};--g2:${g[1]}">${c.img?`<img src="${c.img}" alt="">`:c.url?`<img src="${c.url}/low.webp" alt="" loading="lazy" referrerpolicy="no-referrer">`:phHTML(s,n)}<span class="no">${n}</span>${c.rare?`<span class="st">${'★'.repeat(c.rare)}</span>`:''}${c.name?`<span class="tag">${esc(c.name)}</span>`:''}</div>`;
+    }
+    h+='</div>';
+  }
+  const b=$('#binder');b.innerHTML=h;b.classList.toggle('go',!!anim);b.style.setProperty('--dx',anim*24+'px');anim=0;
+  $('#pgi').textContent=step===2?`Páginas ${page+1}–${Math.min(page+2,pages)} de ${pages}`:`Página ${page+1} de ${pages}`;
+  $('#prev').disabled=page===0;$('#next').disabled=page+step>=pages;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x.dataset.f===filt));
+}
+function go(d){const st=wide()?2:1,np=Math.ceil(set().total/set().per);const t=page+d*st;if(t<0||t>=np)return;page=t;anim=d;render()}
+function openCard(n){
+  const s=set(),c=s.cards[n]||{};cur=n;img=c.img||'';
+  $('#dct').textContent='Carta nº '+n;$('#dcn').value=c.name||'';$('#dcty').value=c.type||'';$('#dcr').value=c.rare||0;
+  $('#pv').style.backgroundImage=img?`url(${img})`:'';$('#dc').showModal();upLink();
+}
+function upLink(){$('#lk').href='https://www.google.com/search?tbm=isch&q='+encodeURIComponent('carta pokémon '+($('#dcn').value||'')+' '+set().name)}
+$('#dcn').oninput=upLink;
+function toggle(n){const s=set();if(s.cards[n])delete s.cards[n];else{s.cards[n]={name:''};if(Object.keys(s.cards).length===s.total)toast('Coleção completa! 🎉')}save();render()}
+$('#binder').onclick=e=>{const el=e.target.closest('.slot[data-n]');if(!el)return;const n=+el.dataset.n;$('#quick').checked?toggle(n):openCard(n)};
+$('#binder').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const el=e.target.closest('.slot[data-n]');if(el){e.preventDefault();openCard(+el.dataset.n)}}};
+$('#binder').onpointermove=e=>{const el=e.target.closest('.slot.have');if(!el||e.pointerType==='touch')return;const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;el.style.setProperty('--ry',(x-.5)*18+'deg');el.style.setProperty('--rx',(.5-y)*18+'deg');el.style.setProperty('--mx',x*100+'%');el.style.setProperty('--my',y*100+'%')};
+$('#binder').onpointerout=e=>{const el=e.target.closest('.slot.have');if(el){el.style.setProperty('--rx','0deg');el.style.setProperty('--ry','0deg')}};
+let sx=null;$('#binder').ontouchstart=e=>{sx=e.touches[0].clientX};
+$('#binder').ontouchend=e=>{if(sx===null)return;const d=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(d)>60)go(d<0?1:-1)};
+$('#fb').onclick=()=>$('#ff').click();
+$('#ff').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const W=260,H=364,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),k=Math.max(W/im.width,H/im.height),w=im.width*k,h=im.height*k;x.drawImage(im,(W-w)/2,(H-h)/2,w,h);img=c.toDataURL('image/jpeg',.72);$('#pv').style.backgroundImage=`url(${img})`};im.onerror=()=>toast('Não consegui ler esta imagem');im.src=r.result};r.readAsDataURL(f)};
+$('#fx').onclick=()=>{img='';$('#pv').style.backgroundImage=''};
+$('#dcy').onclick=()=>{const s=set(),had=!!s.cards[cur];s.cards[cur]={name:$('#dcn').value.trim(),type:$('#dcty').value,rare:+$('#dcr').value,img};
+  if(save()){$('#dc').close();if(!had&&Object.keys(s.cards).length===s.total)toast('Coleção completa! 🎉')}render()};
+$('#dcx').onclick=()=>{delete set().cards[cur];save();$('#dc').close();render()};
+$('#dcc').onclick=()=>$('#dc').close();
+$('#prev').onclick=()=>go(-1);$('#next').onclick=()=>go(1);
+document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open]')||e.target.tagName==='INPUT')return;if(e.key==='ArrowLeft')go(-1);if(e.key==='ArrowRight')go(1)});
+addEventListener('resize',render);
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filt=b.dataset.f;render()});
+$('#q').oninput=e=>{q=e.target.value.trim();const s=set(),ql=q.toLowerCase();let n=0;
+  if(/^\d+$/.test(q))n=+q;else if(ql)n=+Object.keys(s.cards).sort((a,b)=>a-b).find(k=>(s.cards[k].name||'').toLowerCase().includes(ql))||0;
+  if(n>=1&&n<=s.total)page=Math.floor((n-1)/s.per);render()};
+$('#sel').onchange=e=>{S.cur=+e.target.value;page=0;save();render()};
+$('#new').onclick=()=>$('#dn').showModal();$('#ncc').onclick=()=>$('#dn').close();
+$('#nok').onclick=()=>{S.sets.push({name:$('#nn').value.trim()||'Nova coleção',total:Math.max(1,Math.min(1500,+$('#nt').value||1)),per:+$('#np').value,cards:{}});
+  S.cur=S.sets.length-1;page=0;$('#nn').value='';save();$('#dn').close();render()};
+$('#data').onclick=()=>{const s=set(),m=[];for(let i=1;i<=s.total;i++)if(!s.cards[i])m.push(i);
+  $('#faltam').value=m.length?m.join(', '):'Coleção completa! 🎉';$('#bk').value=JSON.stringify(S);$('#dd').showModal()};
+$('#ddc').onclick=()=>$('#dd').close();
+$('#cp').onclick=async()=>{try{await navigator.clipboard.writeText($('#bk').value);toast('Backup copiado')}catch(e){$('#bk').select();toast('Selecione e copie o texto manualmente')}};
+$('#imp').onclick=()=>{try{let d=JSON.parse($('#bk').value);if(d&&!d.sets&&typeof d.total==='number')d={cur:0,sets:[d]};
+  if(!d||!Array.isArray(d.sets)||!d.sets.length)throw 0;if(!confirm('Substituir suas coleções atuais pelo backup?'))return;
+  S=norm(d);S.cur=0;page=0;save();$('#dd').close();render();toast('Backup restaurado')}catch(e){toast('Backup inválido')}};
+$('#del').onclick=()=>{if(!confirm('Apagar esta coleção?'))return;S.sets.splice(S.cur,1);
+  if(!S.sets.length)S.sets.push({name:'Minha coleção',total:150,per:9,cards:{}});S.cur=0;page=0;save();$('#dd').close();render()};
+/* Scanner */
+let SM=null,SCN=[],ctl=null;
+(async()=>{try{if(!window.claude)return;SM=await claude.use('sample');if(!SM)return;const l=await SM.limits();if(l&&l.images)$('#scan').hidden=false}catch(e){}})();
+$('#scan').onclick=()=>{$('#sl').innerHTML='';$('#sim').hidden=true;$('#sp').textContent='';$('#ds').showModal()};
+$('#sm').onchange=e=>{$('#so').hidden=e.target.value!=='o'};
+$('#sdc').onclick=()=>{ctl&&ctl.abort();$('#ds').close()};
+$('#sst').onclick=()=>{ctl&&ctl.abort()};
+const grid=()=>{const p=set().per;return p===4?[2,2]:p===12?[3,4]:[3,3]};
+function prep(file){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(b=>ok({c,b}),'image/jpeg',.85)};im.onerror=no;im.src=r.result};r.onerror=no;r.readAsDataURL(file)})}
+function crop(c,row,col,R,C){const cw=c.width/C,ch=c.height/R,m=.06,o=document.createElement('canvas');o.width=260;o.height=364;o.getContext('2d').drawImage(c,col*cw+cw*m,row*ch+ch*m,cw*(1-2*m),ch*(1-2*m),0,0,260,364);return o.toDataURL('image/jpeg',.72)}
+function cntScan(){$('#sib').textContent=`Importar ${SCN.filter(c=>c.on&&c.n>=1).length} cartas`}
+function showScan(){
+  $('#sl').innerHTML=SCN.map((c,i)=>`<div class="sr"><input type="checkbox" data-i="${i}" ${c.on?'checked':''} aria-label="Incluir"><img src="${c.img}" alt=""><input type="number" min="1" value="${c.n||''}" placeholder="nº" data-i="${i}" data-k="n" aria-label="Número"><input type="text" value="${esc(c.name)}" data-i="${i}" data-k="name" aria-label="Nome"></div>`).join('');
+  $('#sim').hidden=!SCN.length;cntScan();
+}
+$('#sl').oninput=e=>{const t=e.target,c=SCN[t.dataset.i];if(!c||!t.dataset.k)return;c[t.dataset.k]=t.dataset.k==='n'?+t.value:t.value;cntScan()};
+$('#sl').onchange=e=>{const t=e.target,c=SCN[t.dataset.i];if(c&&t.type==='checkbox'){c.on=t.checked;cntScan()}};
+$('#sgo').onclick=async()=>{
+  const fs=[...$('#sf').files];if(!fs.length){toast('Escolha ao menos uma foto');return}
+  const [R,C]=grid(),byNum=$('#sm').value==='p',s0=Math.max(1,+$('#s0').value||1);
+  ctl=new AbortController();SCN=[];$('#sl').innerHTML='';$('#sim').hidden=true;$('#sgo').hidden=true;$('#sst').hidden=false;
+  try{
+    for(let i=0;i<fs.length;i++){
+      $('#sp').textContent=`Lendo foto ${i+1} de ${fs.length}… pode levar alguns segundos`;
+      const {c,b}=await prep(fs[i]);
+      const prompt=`A imagem é a foto de uma página de fichário de cartas Pokémon: ${R} linhas por ${C} colunas de bolsos, da esquerda para a direita e de cima para baixo. Para cada bolso, leia a carta. Responda SOMENTE com JSON: {"cards":[{"row":0,"col":0,"empty":false,"name":"nome da carta","number":25,"total":165,"type":"","rare":0}]}. Um item por bolso (${R*C} no total). row e col começam em 0. "empty": true se o bolso estiver vazio. "number" e "total" são os números impressos no canto da carta (ex.: 025/165 → number 25, total 165); use null se não der para ler. "type" deve ser exatamente um de: ${Object.keys(TY).join(', ')}, ou "" se não souber (carta Incolor = Normal). "rare": 0 se não souber, 1 comum ou incomum, 2 rara ou holo, 3 ultra rara (EX, V, arte completa, secreta). Não invente: se não conseguir ler, use "" ou null.`;
+      const d=await SM.json(prompt,{images:[b],signal:ctl.signal,cache:false});
+      for(const k of (d.cards||[])){
+        if(k.empty||!Number.isInteger(k.row)||!Number.isInteger(k.col)||k.row<0||k.col<0||k.row>=R||k.col>=C)continue;
+        const pos=s0+i*R*C+k.row*C+k.col,num=k.number?+k.number:0;
+        SCN.push({n:byNum?num:pos,on:!byNum||num>0,name:k.name||'',type:TY[k.type]?k.type:'',rare:[0,1,2,3].includes(k.rare)?k.rare:0,img:crop(c,k.row,k.col,R,C)});
+      }
+    }
+    $('#sp').textContent=SCN.length?'Confira os dados (corrija o que precisar) e importe:':'Nenhuma carta encontrada. Tente uma foto mais reta e com mais luz.';
+  }catch(e){
+    const k=e&&e.code;
+    $('#sp').textContent=k==='cancelled'?'Escaneamento interrompido.':k==='not_granted'?'Sem permissão para usar o Claude neste fichário.':k==='rate_limited'?'Limite de uso atingido. Tente de novo mais tarde.':k==='image_rejected'?'Uma das imagens não pôde ser lida. Tente outra foto.':'Não foi possível ler as fotos agora. Tente de novo.';
+  }
+  $('#sgo').hidden=false;$('#sst').hidden=true;showScan();
+};
+$('#sib').onclick=()=>{
+  const s=set();let ok=0,sk=0;
+  SCN.forEach(c=>{if(!c.on)return;if(!(c.n>=1&&c.n<=s.total)){sk++;return}
+    const o=s.cards[c.n]||{};s.cards[c.n]={name:(c.name||'').trim()||o.name||'',type:c.type||o.type||'',rare:c.rare||o.rare||0,img:c.img};ok++});
+  if(save()){$('#ds').close();toast(`${ok} cartas importadas`+(sk?` · ${sk} fora da numeração 1–${s.total}`:''));render()}
+};
+/* Scanner v2 + festa */
+function confetti(){const e=['✨','⭐','🎉','⚡','🔥','💧','🍃','🎴'];for(let i=0;i<34;i++){const s=document.createElement('span');s.className='cf';s.textContent=e[i%e.length];s.style.left=Math.random()*100+'vw';s.style.animationDelay=Math.random()*.8+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),3500)}}
+function prep(file){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,2000/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(b=>ok({c,b}),'image/jpeg',.88)};im.onerror=no;im.src=r.result};r.onerror=no;r.readAsDataURL(file)})}
+function cropB(c,b,R,C,r,q){let[x,y,w,h]=Array.isArray(b)&&b.length===4&&b.every(v=>typeof v==='number')?b:[q/C,r/R,1/C,1/R];
+  if(!(w>.04&&h>.04&&x>-.03&&y>-.03&&x+w<1.03&&y+h<1.03))[x,y,w,h]=[q/C,r/R,1/C,1/R];
+  x=Math.max(0,x);y=Math.max(0,y);w=Math.min(w,1-x);h=Math.min(h,1-y);
+  const o=document.createElement('canvas');o.width=260;o.height=364;o.getContext('2d').drawImage(c,x*c.width,y*c.height,w*c.width,h*c.height,0,0,260,364);return o.toDataURL('image/jpeg',.72)}
+function showScan(){
+  $('#sl').innerHTML=SCN.map((c,i)=>`<div class="sr"><input type="checkbox" data-i="${i}" ${c.on?'checked':''} aria-label="Incluir"><img src="${c.img}" alt=""><input type="number" min="1" value="${c.n||''}" placeholder="nº" data-i="${i}" data-k="n" aria-label="Número"><input type="text" value="${esc(c.name)}" data-i="${i}" data-k="name" aria-label="Nome">${c.bd?`<span class="bd">${c.bd}</span>`:''}</div>`).join('');
+  $('#sim').hidden=!SCN.length;cntScan();
+}
+let SCT=0;
+$('#sat').onclick=()=>{set().total=SCT;save();render();$('#sat').hidden=true;toast('Coleção ajustada para '+SCT+' cartas')};
+$('#sgo').onclick=async()=>{
+  const fs=[...$('#sf').files];if(!fs.length){toast('Escolha ao menos uma foto');return}
+  const byNum=$('#sm').value==='p',s=set(),pr=$('#spr'),PROMPT=`Esta é a foto de UMA página de fichário de cartas Pokémon (bolsos em grade, lidos da esquerda para a direita e de cima para baixo). Ignore o fundo, dedos e reflexos. Responda SOMENTE com JSON, sem texto extra: {"rows":3,"cols":3,"cards":[{"row":0,"col":0,"empty":false,"box":[0.05,0.04,0.28,0.30],"name":"","number":25,"total":165,"type":"","rare":0}]}. rows e cols = tamanho da grade da página. Um item por bolso; row e col começam em 0. box = [x,y,largura,altura] da carta, em frações de 0 a 1 da imagem inteira. empty=true se o bolso estiver vazio. name = nome impresso na carta. number e total = números do canto da carta (025/165 vira 25 e 165), null se ilegível. type = exatamente um de: ${Object.keys(TY).join(', ')}, ou "" se não souber. rare: 0 não sei, 1 comum ou incomum, 2 rara ou holo, 3 ultra rara (EX, V, arte completa, secreta). Nunca invente: se não conseguir ler, use "" ou null.`;
+  let off=Math.max(1,+$('#s0').value||1),bad=0,fatal='';const tot={};
+  ctl=new AbortController();SCN=[];SCT=0;$('#sl').innerHTML='';$('#sim').hidden=true;$('#sat').hidden=true;$('#sgo').hidden=true;$('#sst').hidden=false;pr.hidden=false;pr.max=fs.length;pr.value=0;
+  try{
+    for(let i=0;i<fs.length;i++){
+      $('#sp').textContent=`🔍 Lendo página ${i+1} de ${fs.length}…`;
+      try{
+        const {c,b}=await prep(fs[i]);
+        const d=await SM.json(PROMPT,{images:[b],signal:ctl.signal,cache:false});
+        const R=Math.max(1,Math.min(6,+d.rows||3)),C=Math.max(1,Math.min(6,+d.cols||3)),base=off;
+        for(const k of d.cards||[]){
+          if(k.empty||!Number.isInteger(k.row)||!Number.isInteger(k.col)||k.row<0||k.col<0||k.row>=R||k.col>=C)continue;
+          const num=k.number?+k.number:0;
+          if(Number.isInteger(k.total)&&k.total>0)tot[k.total]=(tot[k.total]||0)+1;
+          SCN.push({n:byNum?num:base+k.row*C+k.col,on:!byNum||num>0,name:k.name||'',type:TY[k.type]?k.type:'',rare:[0,1,2,3].includes(k.rare)?k.rare:0,img:cropB(c,k.box,R,C,k.row,k.col)});
+        }
+        off+=R*C;
+      }catch(e){if(e&&['cancelled','not_granted','rate_limited','sampling_disabled','session_expired'].includes(e.code))throw e;bad++}
+      pr.value=i+1;
+    }
+  }catch(e){const k=e&&e.code;fatal=k==='cancelled'?'Escaneamento interrompido.':k==='not_granted'?'Sem permissão para usar o Claude neste fichário.':k==='rate_limited'?'Limite de uso atingido. Tente de novo mais tarde.':'Não foi possível continuar agora. Tente de novo.'}
+  const seen=new Set();
+  SCN.forEach(c=>{if(c.n>=1){if(seen.has(c.n)){c.on=false;c.bd='repetida'}else if(s.cards[c.n]){c.bd='já tem';c.on=!s.cards[c.n].img}seen.add(c.n)}});
+  SCT=+Object.keys(tot).sort((a,b)=>tot[b]-tot[a])[0]||0;
+  if(byNum&&SCT&&SCT!==s.total){$('#sat').textContent=`Ajustar coleção para ${SCT} cartas (total impresso)`;$('#sat').hidden=false}
+  $('#sp').textContent=fatal||(SCN.length?`✅ ${SCN.length} cartas lidas${bad?` · ${bad} foto(s) falharam`:''}. Confira e importe:`:'Nenhuma carta encontrada. Tente uma foto mais reta e com mais luz.');
+  pr.hidden=true;$('#sgo').hidden=false;$('#sst').hidden=true;showScan();
+};
+/* Estante de fichários */
+const COV=['#d93a32','#3b4cca','#e6a800','#2e9b4e','#8a4fd1','#e76fb0','#2f2c3d','#1b9aa6'];
+let view='shelf',ei=-1,nc=0;
+function drawShelf(){
+  $('#shelf').innerHTML=S.sets.map((s,i)=>{const h=Object.keys(s.cards).filter(k=>k<=s.total).length,p=s.total?Math.round(h/s.total*100):0,c=COV[(s.color!==undefined?s.color:i)%COV.length];
+    return `<div class="bk" data-i="${i}" tabindex="0" role="button" aria-label="Abrir ${esc(s.name)}" style="--cv:${c}"><button class="ed" data-e="${i}" aria-label="Editar fichário">✎</button><div class="lb"><b>${esc(s.name)}</b><small>${h} de ${s.total} · ${p}%</small><i style="--w:${p}%"></i></div></div>`}).join('')
+   +'<div class="bk add" id="addbk" tabindex="0" role="button"><span>＋</span>Novo fichário</div>';
+}
+$('#shelf').onclick=e=>{const x=e.target.closest('[data-e]');if(x){openEd(+x.dataset.e);return}
+  if(e.target.closest('#addbk')){openEd(-1);return}
+  const b=e.target.closest('.bk[data-i]');if(b){S.cur=+b.dataset.i;page=0;view='binder';save();render()}};
+$('#shelf').onkeydown=e=>{if(e.key==='Enter'&&e.target.classList.contains('bk'))e.target.click()};
+$('#back').onclick=()=>{view='shelf';render()};
+$('#new').onclick=()=>openEd(-1);
+function swatches(){$('#sw').innerHTML=COV.map((c,k)=>`<button type="button" class="swb${k===nc?' on':''}" data-k="${k}" style="background:${c}" aria-label="Cor ${k+1}"></button>`).join('')}
+$('#sw').onclick=e=>{const b=e.target.closest('[data-k]');if(b){nc=+b.dataset.k;swatches()}};
+function openEd(i){ei=i;const s=i<0?{name:'',total:150,per:9}:S.sets[i];
+  nc=i<0?S.sets.length%COV.length:(s.color!==undefined?s.color:i%COV.length);
+  $('#dnt').textContent=i<0?'Novo fichário':'Editar fichário';$('#nn').value=s.name;$('#nn').placeholder='Ex.: Escarlate e Violeta 151';$('#nt').value=s.total;$('#np').value=s.per;
+  $('#nok').textContent=i<0?'Criar':'Salvar';$('#ndel').hidden=i<0;swatches();$('#dn').showModal()}
+$('#nok').onclick=()=>{const o={name:$('#nn').value.trim()||'Novo fichário',total:Math.max(1,Math.min(1500,+$('#nt').value||1)),per:+$('#np').value,color:nc};
+  if(ei<0){S.sets.push({...o,cards:{}});S.cur=S.sets.length-1;page=0;view='binder';toast('Fichário criado! 📒')}else Object.assign(S.sets[ei],o);
+  save();$('#dn').close();render()};
+$('#ndel').onclick=()=>{if(!confirm('Apagar este fichário e todas as cartas dele?'))return;S.sets.splice(ei,1);
+  if(!S.sets.length)S.sets.push({name:'Meu fichário',total:150,per:9,color:0,cards:{}});
+  S.cur=0;view='shelf';save();$('#dn').close();$('#dd').close();render()};
+$('#del').onclick=()=>{ei=S.cur;$('#ndel').onclick()};
+/* Qualidade: fotos em alta resolução + armazenamento grande (IndexedDB) */
+let DB=null,ready=false;const IMG=new Map();
+function openDB(){return new Promise(r=>{try{const q=indexedDB.open('fichario-img',1);q.onupgradeneeded=()=>q.result.createObjectStore('i');q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)}catch(e){r(null)}})}
+function idb(m,f){return new Promise(r=>{try{const t=DB.transaction('i',m),o=f(t.objectStore('i'));t.oncomplete=()=>r(o&&o.result);t.onerror=t.onabort=()=>r(null)}catch(e){r(null)}})}
+function idbAll(){return new Promise(r=>{try{const t=DB.transaction('i'),o=t.objectStore('i'),k=o.getAllKeys(),v=o.getAll();t.oncomplete=()=>r(k.result.map((x,i)=>[x,v.result[i]]));t.onerror=()=>r([])}catch(e){r([])}})}
+function newId(){return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function save(){
+  S.sets.forEach(s=>{if(!s.id)s.id=newId()});
+  const useDB=!!DB&&ready;
+  if(useDB){const live=new Set();
+    S.sets.forEach(s=>{for(const n in s.cards){const c=s.cards[n],k=s.id+':'+n;if(c.img){live.add(k);if(IMG.get(k)!==c.img){IMG.set(k,c.img);idb('readwrite',o=>o.put(c.img,k))}}}});
+    for(const k of [...IMG.keys()])if(!live.has(k)){IMG.delete(k);idb('readwrite',o=>o.delete(k))}}
+  try{localStorage.setItem('fichario-pokemon',JSON.stringify(S,useDB?(k,v)=>k==='img'?undefined:v:undefined));return true}
+  catch(e){toast('Armazenamento cheio: faça backup e remova algumas fotos');return false}
+}
+function out(c,sx,sy,sw,sh,cover){const W=400,H=560,o=document.createElement('canvas');o.width=W;o.height=H;const x=o.getContext('2d');x.imageSmoothingQuality='high';x.filter='contrast(1.06) saturate(1.06)';
+  if(cover){const k=Math.max(W/sw,H/sh),w=W/k,h=H/k;sx+=(sw-w)/2;sy+=(sh-h)/2;sw=w;sh=h}
+  x.drawImage(c,sx,sy,sw,sh,0,0,W,H);return o.toDataURL('image/jpeg',.86)}
+function prep(file){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+  const sc=m=>{const k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,0,0,c.width,c.height);return c};
+  const big=sc(3200),sm=sc(2000);sm.toBlob(b=>ok({c:big,b}),'image/jpeg',.88)};im.onerror=no;im.src=r.result};r.onerror=no;r.readAsDataURL(file)})}
+function cropB(c,b,R,C,r,q){let[x,y,w,h]=Array.isArray(b)&&b.length===4&&b.every(v=>typeof v==='number')?b:[q/C,r/R,1/C,1/R];
+  if(!(w>.04&&h>.04&&x>-.03&&y>-.03&&x+w<1.03&&y+h<1.03))[x,y,w,h]=[q/C,r/R,1/C,1/R];
+  x=Math.max(0,x);y=Math.max(0,y);w=Math.min(w,1-x);h=Math.min(h,1-y);
+  return out(c,x*c.width,y*c.height,w*c.width,h*c.height,false)}
+$('#ff').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  prep(f).then(({c})=>{img=out(c,0,0,c.width,c.height,true);$('#pv').style.backgroundImage=`url(${img})`}).catch(()=>toast('Não consegui ler esta imagem'))};
+(async()=>{DB=await openDB();
+  if(DB){S.sets.forEach(s=>{if(!s.id)s.id=newId()});const all=await idbAll();
+    all.forEach(([k,v])=>{const i=k.indexOf(':'),s=S.sets.find(x=>x.id===k.slice(0,i)),c=s&&s.cards[k.slice(i+1)];IMG.set(k,v);if(c&&!c.img)c.img=v});
+    ready=true;save()}else ready=true;
+  render()})();
+/* Catálogo (dados) separado das imagens */
+const RL=['','★ Comum','★★ Rara','★★★ Ultra'];
+function info(s,n){const c=s.cards[n]||{},k=(s.cat&&s.cat[n])||{};return{name:c.name||k.name||'',col:c.col||k.col||s.colecao||s.name,rare:c.rare||k.rare||0,type:c.type||k.type||''}}
+function phHTML(s,n){const i=info(s,n);return `<div class="ph2"><b>${esc(i.name||'Sem nome')}</b><span>${n}/${s.total}</span><span>${esc(i.col)}</span>${i.rare?`<span>${RL[i.rare]}</span>`:''}</div>`}
+function rareFrom(v){if(typeof v==='number')return v>=1&&v<=3?v:0;const t=String(v||'').toLowerCase();if(/ultra|secret|completa|full/.test(t))return 3;if(/rara|rare|holo/.test(t))return 2;if(/comum|common/.test(t))return 1;return +t>=1&&+t<=3?+t:0}
+function openCard(n){const s=set(),c=s.cards[n]||{},i=info(s,n);cur=n;img=c.img||'';
+  $('#dct').textContent=`Carta nº ${n} de ${s.total}`;$('#dcn').value=i.name;$('#dcc2').value=c.col||'';$('#dcc2').placeholder=s.colecao||s.name;$('#dcty').value=i.type;$('#dcr').value=i.rare;
+  $('#pv').style.backgroundImage=img?`url(${img})`:'';$('#dc').showModal();upLink()}
+$('#dcy').onclick=()=>{const s=set(),had=!!s.cards[cur];s.cards[cur]={name:$('#dcn').value.trim(),col:$('#dcc2').value.trim(),type:$('#dcty').value,rare:+$('#dcr').value,img,url:(s.cards[cur]||{}).url};
+  if(save()){$('#dc').close();if(!had&&Object.keys(s.cards).length===s.total)toast('Coleção completa! 🎉')}render()};
+function openK(){const s=set();let r='';const out=[];
+  for(let n=1;n<=s.total;n++){const i=info(s,n),has=!!s.cards[n];r+=`<tr><td>${n}</td><td>${esc(i.name||'—')}</td><td>${esc(i.col)}</td><td>${RL[i.rare]||'—'}</td><td>${has?'✓':'—'}</td></tr>`;
+    if(i.name||i.rare||i.type||has)out.push({numero:n,nome:i.name,colecao:i.col,raridade:RL[i.rare].replace(/[★ ]/g,''),tipo:i.type})}
+  $('#kt').innerHTML=`<table><tr><th>Nº</th><th>Nome</th><th>Coleção</th><th>Raridade</th><th>Tenho</th></tr>${r}</table>`;
+  $('#kj').value=JSON.stringify(out);$('#dk').showModal()}
+$('#kbtn').onclick=openK;$('#kcl').onclick=()=>$('#dk').close();
+$('#kcp').onclick=async()=>{try{await navigator.clipboard.writeText($('#kj').value);toast('Catálogo copiado')}catch(e){$('#kj').select();toast('Selecione e copie o texto manualmente')}};
+$('#kim').onclick=()=>{try{const a=JSON.parse($('#kj').value);if(!Array.isArray(a))throw 0;const s=set();s.cat=s.cat||{};let k=0;
+  a.forEach(o=>{const n=+(o.numero??o.number??o.n);if(!(n>=1&&n<=s.total))return;s.cat[n]={name:String(o.nome??o.name??'').trim(),col:String(o.colecao??o.set??'').trim(),rare:rareFrom(o.raridade??o.rarity),type:TY[o.tipo]?o.tipo:''};k++});
+  save();render();openK();toast(`${k} cartas no catálogo`)}catch(e){toast('Catálogo inválido: use uma lista JSON')}};
+const oe=openEd;openEd=function(i){oe(i);$('#ncol').value=i<0?'':(S.sets[i].colecao||'')};
+const ok0=$('#nok').onclick;$('#nok').onclick=()=>{const v=$('#ncol').value.trim(),i=ei;ok0();const t=i<0?S.sets[S.sets.length-1]:S.sets[i];if(t){t.colecao=v;save();render()}};
+render();
+</script>
+<script type="module" src="busca-tcgdex.js"></script>
+</body>
+</html>
