@@ -1,12 +1,12 @@
 // Liga o fichário (index.html) às fontes de cartas. Para trocar ou acrescentar
 // uma fonte, crie um adaptador (formato em catalogo.js) e registre-o aqui.
-import { criarLimitador, criarHttp } from './infra.js?v=6';
-import { criarFonteTcgdex } from './tcgdex.js?v=6';
-import { criarFonteScryfall } from './scryfall.js?v=6';
-import { criarFonteLorcast } from './lorcast.js?v=6';
-import { criarFonteOptcg } from './optcg.js?v=6';
-import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=6';
-import { iniciarFoto } from './foto.js?v=6';
+import { criarLimitador, criarHttp } from './infra.js?v=7';
+import { criarFonteTcgdex } from './tcgdex.js?v=7';
+import { criarFonteScryfall } from './scryfall.js?v=7';
+import { criarFonteLorcast } from './lorcast.js?v=7';
+import { criarFonteOptcg } from './optcg.js?v=7';
+import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=7';
+import { iniciarFoto } from './foto.js?v=7';
 
 // Limites conservadores por fonte. `intervalo` = espera mínima entre requisições (ms).
 // Scryfall: a busca aceita ~2/s e o resto ~10/s; imagens (*.scryfall.io) não têm limite.
@@ -68,7 +68,7 @@ async function trocarJogo(id, salvar) {
   res = []; pag = 1;
   $('#tg').innerHTML = ''; $('#tcol').value = ''; $('#tsug').innerHTML = ''; $('#tmw').hidden = true;
   const a = fonteAtiva().atribuicao;
-  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v6`; // número da versão: confirma que os arquivos novos carregaram
+  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v7`; // número da versão: confirma que os arquivos novos carregaram
   await carregarColecoes();
 }
 
@@ -134,14 +134,30 @@ function mesclar(rs) {
 }
 const mostrarSemFoto = () => $('#tsf').checked;
 const visiveis = () => res.filter(c => mostrarSemFoto() || c.imagem).length;
-let auto = 0;
+let auto = 0, rank = false;
+// Ordena os resultados pela semelhança com o nome lido na foto (tolera 1 ou 2 letras erradas).
+const limpo = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+function lev(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+const sim = (a, b) => { a = limpo(a); b = limpo(b); if (!a || !b) return 0; if (a.includes(b) || b.includes(a)) return .9; return 1 - lev(a, b) / Math.max(a.length, b.length); };
+function ranquear(nome) {
+  if (res.length < 2) return;
+  res.forEach(c => { c.sim = sim(nome, c.nome) + (c.imagem ? .05 : 0); });
+  res.sort((a, b) => b.sim - a.sim);
+  rank = true; desenhar(); $('#tg').scrollTop = 0;
+}
 
 async function pesquisar(nova) {
   if (carregando) return;
   carregando = true;
   let mais = false;
   try {
-    if (nova) { pag = 1; res = []; auto = 0; $('#tg').scrollTop = 0; }
+    if (nova) { pag = 1; res = []; auto = 0; rank = false; $('#tg').scrollTop = 0; }
     const nome = $('#tn').value.trim(), { num, tot } = lerNumero($('#tnum').value), sel = colSel();
     if ($('#tcol').value.trim() && !sel) { $('#tst').textContent = 'Coleção não encontrada. Escolha uma da lista.'; return; }
     $('#tst').textContent = 'Buscando…';
@@ -187,7 +203,7 @@ $('#tsf').onchange = () => desenhar();
 function desenhar() {
   $('#tg').innerHTML = res.map((c, i) => ({ c, i })).filter(x => mostrarSemFoto() || x.c.imagem).map(({ c, i }) => `<div class="tc">
     ${c.imagem ? `<img src="${esc(c.imagem)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ni">sem imagem</div>'}
-    <b>${esc(c.nome)}</b><small>nº ${esc(c.numero)}${c.lingua === 'en' ? ' · EN' : ''}</small>${c.fonte === 'tcgdex' || c.fonte === 'optcg' ? `<small style="color:var(--mut)">${esc(c.id)}</small>` : ''}
+    ${rank && i === 0 && c.sim >= .55 ? '<small style="color:var(--ok)">✔ mais provável</small>' : ''}<b>${esc(c.nome)}</b><small>nº ${esc(c.numero)}${c.lingua === 'en' ? ' · EN' : ''}</small>${c.fonte === 'tcgdex' || c.fonte === 'optcg' ? `<small style="color:var(--mut)">${esc(c.id)}</small>` : ''}
     <button class="p" data-i="${i}" data-t="1">Tenho ✓</button><button data-i="${i}" data-t="0">Só catálogo</button></div>`).join('');
 }
 // Imagem que falhar vira o espaço reservado com os dados da carta.
@@ -232,4 +248,4 @@ $('#tg').onclick = async e => {
 };
 
 // Identificar carta por foto (botões na busca e no quadro da carta).
-iniciarFoto({ pesquisar: () => pesquisar(true), abrirBusca: () => $('#tbtn').onclick() });
+iniciarFoto({ pesquisar: () => pesquisar(true), abrirBusca: () => $('#tbtn').onclick(), ranquear });
