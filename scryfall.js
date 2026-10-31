@@ -21,7 +21,7 @@ export function criarFonteScryfall({ http }) {
 
     async colecoes() {
       const { dados } = await http.buscar(BASE + '/sets', { ttl: 7 * 864e5 });
-      return dados.data.filter(s => !s.digital).map(s => ({ id: s.code, nome: s.name, total: s.card_count, lingua: '' }));
+      return dados.data.filter(s => !s.digital).map(s => ({ id: s.code, nome: s.name, total: s.card_count, oficial: s.printed_size ?? s.card_count, lingua: '' }));
     },
     async buscar({ nome = '', numero = '', colecao = '', pagina = 1 } = {}) {
       if (!nome.trim() && !colecao) throw new Error('Digite um nome ou escolha uma coleção.');

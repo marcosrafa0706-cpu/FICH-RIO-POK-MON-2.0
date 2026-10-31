@@ -154,7 +154,7 @@ body:not(.sh) #new{display:none}
     <button id="next">▶</button>
   </div>
   <p style="color:var(--mut);font-size:.85rem">Toque numa carta para registrar, adicionar foto, tipo e raridade. Deslize ou use as setas ◀ ▶ para virar a página.</p>
-  <p style="color:var(--mut);font-size:.75rem">Cartas buscadas usam dados e imagens do <a href="https://tcgdex.dev" target="_blank" rel="noopener noreferrer">TCGdex</a>. Site de fã, sem ligação com The Pokémon Company, Nintendo ou Game Freak.</p>
+  <p style="color:var(--mut);font-size:.75rem">Cartas buscadas usam dados e imagens do <a href="https://tcgdex.dev" target="_blank" rel="noopener noreferrer">TCGdex</a>, <a href="https://scryfall.com" target="_blank" rel="noopener noreferrer">Scryfall</a>, <a href="https://lorcast.com" target="_blank" rel="noopener noreferrer">Lorcast</a> e <a href="https://www.optcgapi.com" target="_blank" rel="noopener noreferrer">OPTCG API</a>. Site de fã, sem ligação com The Pokémon Company, Wizards of the Coast, Disney, Bandai ou Nintendo.</p>
 </div>
 <div id="toast" popover="manual"></div>
 
@@ -167,7 +167,7 @@ body:not(.sh) #new{display:none}
   <div class="ph"><div class="pv" id="pv"></div>
     <div class="btns" style="margin:0"><button id="fb">📷 Foto</button><button id="fx">Remover</button></div>
     <input type="file" id="ff" accept="image/*" hidden></div>
-  <div class="btns"><button class="p" id="dcy">Tenho ✓</button><button id="dcx">Não tenho</button><button id="dcc">Fechar</button></div>
+  <div class="btns"><button class="p" id="dcy">Tenho ✓</button><button id="dcx">Limpar slot</button><button id="dcc">Fechar</button></div>
   <p style="margin:12px 0 0;font-size:.85rem"><a id="lk" target="_blank" rel="noopener noreferrer">Ver esta carta no Google Imagens ↗</a></p>
 </dialog>
 
@@ -185,18 +185,21 @@ body:not(.sh) #new{display:none}
   <div class="btns" id="sim" hidden><button class="p" id="sib">Importar</button></div>
 </dialog>
 
-<dialog id="dt"><b>🔎 Buscar cartas (TCGdex)</b>
-  <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Busque por nome, número e/ou coleção. As imagens vêm direto do TCGdex, sem cópia no seu site.</p>
+<dialog id="dt"><b>🔎 Buscar cartas</b>
+  <label for="tjogo">Jogo</label><select id="tjogo"></select>
+  <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Busque por nome, número e/ou coleção. As imagens vêm direto da fonte de cada jogo, sem cópia no seu site.</p>
   <label for="tn">Nome</label><input id="tn" placeholder="Ex.: Pikachu" autocomplete="off">
   <div class="sug" id="tsug"></div>
-  <div class="row" style="margin:0"><div style="flex:1"><label for="tnum">Número</label><input id="tnum" placeholder="Ex.: 25"></div>
+  <div class="row" style="margin:0"><div style="flex:1"><label for="tnum">Número</label><input id="tnum" placeholder="Ex.: 005/225"></div>
   <div style="flex:2"><label for="tcol">Coleção</label><input id="tcol" list="tsets" placeholder="Digite para ver as coleções"></div></div>
   <datalist id="tsets"></datalist>
+  <label for="tslot">Colocar no slot nº</label><input id="tslot" type="number" min="1" placeholder="vazio = próximo slot livre">
+  <label style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:.85rem"><input type="checkbox" id="tsf" style="width:auto"> Mostrar também cartas sem foto</label>
   <div class="btns"><button class="p" id="tgo">Buscar</button><button id="tcl">Fechar</button></div>
   <p id="tst" style="font-size:.85rem;color:var(--mut)"></p>
   <div class="tg" id="tg"></div>
   <div class="btns" id="tmw" hidden><button id="tmore">Carregar mais</button></div>
-  <p style="font-size:.75rem;color:var(--mut)">Dados e imagens: <a href="https://tcgdex.dev" target="_blank" rel="noopener noreferrer">TCGdex</a>. Site de fã, sem ligação com The Pokémon Company, Nintendo ou Game Freak.</p>
+  <p style="font-size:.75rem;color:var(--mut)"><span id="tatr"></span>. Site de fã, sem ligação com The Pokémon Company, Wizards of the Coast, Disney, Bandai ou Nintendo.</p>
 </dialog>
 
 <dialog id="dk"><b>📋 Catálogo do fichário</b>
@@ -223,6 +226,10 @@ body:not(.sh) #new{display:none}
   <div class="btns"><button id="cp">Copiar backup</button><button id="imp">Restaurar</button><button class="danger" id="del">Apagar coleção</button><button id="ddc">Fechar</button></div>
 </dialog>
 
+<script>
+// Miniaturas: TCGdex antigas guardavam só a base do endereço; as demais fontes guardam o endereço completo.
+function imgUrl(u){return /\.(webp|png|jpe?g|avif)(\?|$)/i.test(u)?u:u+'/low.webp'}
+</script>
 <script>
 const $=s=>document.querySelector(s);
 const TY={Normal:['#d8d4c6','#9c978a'],Fogo:['#ff9a5c','#e5412d'],Água:['#6ec1ff','#2a6fd6'],Planta:['#8be28b','#2e9b4e'],Elétrico:['#ffe66b','#f0b400'],Psíquico:['#f58cd3','#a43fbf'],Lutador:['#d98a5b','#9a4a28'],Sombrio:['#7d7a8f','#2f2c3d'],Metal:['#c9d3dd','#7f8ea0'],Dragão:['#9a8cff','#4a3fc4'],Fada:['#ffc0e0','#e76fb0']};
@@ -254,7 +261,7 @@ function render(){
       const dim=(filt==='have'&&!has)||(filt==='miss'&&has)||(ql&&!match&&!/^\d+$/.test(ql));
       if(!has){h+=`<div class="slot${dim?' dim':''}${match?' hit':''}" data-n="${n}" tabindex="0" role="button" aria-label="Carta ${n}, faltando"><span class="n">${n}</span>${s.cat&&s.cat[n]&&s.cat[n].name?`<span class="cn">${esc(s.cat[n].name)}</span>`:''}</div>`;continue}
       const g=TY[c.type]||['#ffe27a','#ff9a5c'];
-      h+=`<div class="slot have${c.img||c.url?' hi':''}${c.name||c.img?'':' nm'}${dim?' dim':''}${match?' hit':''}" data-n="${n}" tabindex="0" role="button" aria-label="Carta ${n}, ${esc(c.name||'sem nome')}" style="--g1:${g[0]};--g2:${g[1]}">${c.img?`<img src="${c.img}" alt="">`:c.url?`<img src="${c.url}/low.webp" alt="" loading="lazy" referrerpolicy="no-referrer">`:phHTML(s,n)}<span class="no">${n}</span>${c.rare?`<span class="st">${'★'.repeat(c.rare)}</span>`:''}${c.name?`<span class="tag">${esc(c.name)}</span>`:''}</div>`;
+      h+=`<div class="slot have${c.img||c.url?' hi':''}${c.name||c.img?'':' nm'}${dim?' dim':''}${match?' hit':''}" data-n="${n}" tabindex="0" role="button" aria-label="Carta ${n}, ${esc(c.name||'sem nome')}" style="--g1:${g[0]};--g2:${g[1]}">${c.img?`<img src="${c.img}" alt="">`:c.url?`<img src="${imgUrl(c.url)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:phHTML(s,n)}<span class="no">${n}</span>${c.rare?`<span class="st">${'★'.repeat(c.rare)}</span>`:''}${c.name?`<span class="tag">${esc(c.name)}</span>`:''}</div>`;
     }
     h+='</div>';
   }
@@ -284,7 +291,7 @@ $('#ff').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
 $('#fx').onclick=()=>{img='';$('#pv').style.backgroundImage=''};
 $('#dcy').onclick=()=>{const s=set(),had=!!s.cards[cur];s.cards[cur]={name:$('#dcn').value.trim(),type:$('#dcty').value,rare:+$('#dcr').value,img};
   if(save()){$('#dc').close();if(!had&&Object.keys(s.cards).length===s.total)toast('Coleção completa! 🎉')}render()};
-$('#dcx').onclick=()=>{delete set().cards[cur];save();$('#dc').close();render()};
+$('#dcx').onclick=()=>{const s=set();delete s.cards[cur];if(s.cat)delete s.cat[cur];save();$('#dc').close();render()};
 $('#dcc').onclick=()=>$('#dc').close();
 $('#prev').onclick=()=>go(-1);$('#next').onclick=()=>go(1);
 document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open]')||e.target.tagName==='INPUT')return;if(e.key==='ArrowLeft')go(-1);if(e.key==='ArrowRight')go(1)});
@@ -456,9 +463,9 @@ $('#ff').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   render()})();
 /* Catálogo (dados) separado das imagens */
 const RL=['','★ Comum','★★ Rara','★★★ Ultra'];
-function info(s,n){const c=s.cards[n]||{},k=(s.cat&&s.cat[n])||{};return{name:c.name||k.name||'',col:c.col||k.col||s.colecao||s.name,rare:c.rare||k.rare||0,type:c.type||k.type||''}}
-function phHTML(s,n){const i=info(s,n);return `<div class="ph2"><b>${esc(i.name||'Sem nome')}</b><span>${n}/${s.total}</span><span>${esc(i.col)}</span>${i.rare?`<span>${RL[i.rare]}</span>`:''}</div>`}
-function rareFrom(v){if(typeof v==='number')return v>=1&&v<=3?v:0;const t=String(v||'').toLowerCase();if(/ultra|secret|completa|full/.test(t))return 3;if(/rara|rare|holo/.test(t))return 2;if(/comum|common/.test(t))return 1;return +t>=1&&+t<=3?+t:0}
+function info(s,n){const c=s.cards[n]||{},k=(s.cat&&s.cat[n])||{};return{name:c.name||k.name||'',num:c.num||k.num||'',col:c.col||k.col||s.colecao||s.name,rare:c.rare||k.rare||0,type:c.type||k.type||''}}
+function phHTML(s,n){const i=info(s,n);return `<div class="ph2"><b>${esc(i.name||'Sem nome')}</b><span>${i.num||`${n}/${s.total}`}</span><span>${esc(i.col)}</span>${i.rare?`<span>${RL[i.rare]}</span>`:''}</div>`}
+function rareFrom(v){if(typeof v==='number')return v>=1&&v<=3?v:0;const t=String(v||'').toLowerCase();if(/ultra|secret|completa|full|legendary|enchanted|mythic|m[ií]tic|lend[aá]ri|encantad|special|especial/.test(t))return 3;if(/rara|rare|holo/.test(t))return 2;if(/comum|common/.test(t))return 1;return +t>=1&&+t<=3?+t:0}
 function openCard(n){const s=set(),c=s.cards[n]||{},i=info(s,n);cur=n;img=c.img||'';
   $('#dct').textContent=`Carta nº ${n} de ${s.total}`;$('#dcn').value=i.name;$('#dcc2').value=c.col||'';$('#dcc2').placeholder=s.colecao||s.name;$('#dcty').value=i.type;$('#dcr').value=i.rare;
   $('#pv').style.backgroundImage=img?`url(${img})`:'';$('#dc').showModal();upLink()}
@@ -478,6 +485,6 @@ const oe=openEd;openEd=function(i){oe(i);$('#ncol').value=i<0?'':(S.sets[i].cole
 const ok0=$('#nok').onclick;$('#nok').onclick=()=>{const v=$('#ncol').value.trim(),i=ei;ok0();const t=i<0?S.sets[S.sets.length-1]:S.sets[i];if(t){t.colecao=v;save();render()}};
 render();
 </script>
-<script type="module" src="busca-tcgdex.js"></script>
+<script type="module" src="busca.js"></script>
 </body>
 </html>

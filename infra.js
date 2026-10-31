@@ -38,8 +38,10 @@ export const cache = {
 };
 
 // Use valores abaixo do limite oficial (margem de segurança).
-export function criarLimitador({ porMinuto = 25, porDia = 900, chave = 'catalogo-uso' } = {}) {
+// `intervalo` = espera mínima (ms) entre requisições (ex.: Scryfall pede 50–100 ms; a busca dele, 500 ms).
+export function criarLimitador({ porMinuto = 25, porDia = 900, chave = 'catalogo-uso', intervalo = 0 } = {}) {
   const janela = [];
+  let ultimo = 0;
   const hoje = () => new Date().toISOString().slice(0, 10);
   const ler = () => {
     try { const u = JSON.parse(localStorage.getItem(chave)); if (u && u.dia === hoje()) return u; } catch {}
@@ -57,8 +59,10 @@ export function criarLimitador({ porMinuto = 25, porDia = 900, chave = 'catalogo
         if (janela.length < porMinuto) break;
         await new Promise(r => setTimeout(r, 60000 - (agora - janela[0]) + 50));
       }
-      janela.push(Date.now());
+      const alvo = Math.max(Date.now(), ultimo + intervalo); ultimo = alvo; // reserva o horário na fila
+      janela.push(alvo);
       const u = ler(); u.n++; gravar(u);
+      if (alvo > Date.now()) await new Promise(r => setTimeout(r, alvo - Date.now()));
     },
   };
 }
@@ -78,7 +82,7 @@ export function criarHttp({ limitador, ttlPadrao = 24 * 3600e3, tentativas = 3 }
           if (r.status === 429 || r.status >= 500) {
             ultimo = new Error('HTTP ' + r.status);
             const ra = +r.headers.get('Retry-After');
-            const espera = (ra ? ra * 1000 : Math.min(30000, 1000 * 2 ** i)) + Math.random() * 500;
+            const espera = (ra ? ra * 1000 : Math.min(30000, (r.status === 429 ? 5000 : 1000) * 2 ** i)) + Math.random() * 500;
             await new Promise(s => setTimeout(s, espera));
             continue;
           }

@@ -8,7 +8,7 @@ const DIAS7 = 7 * 864e5;
 
 export function criarFonteTcgdex({ http, lingua = 'pt', linguas = ['pt', 'en'] }) {
   const U = (p, l) => `${BASE}/${l}${p}`;
-  const norm = (c, l) => ({ id: c.id, nome: c.name || '', numero: c.localId || '', imagem: c.image || '', lingua: l, fonte: 'tcgdex' });
+  const norm = (c, l) => ({ id: c.id, nome: c.name || '', numero: c.localId || '', imagem: c.image ? c.image + '/low.webp' : '', lingua: l, fonte: 'tcgdex' });
 
   return {
     id: 'tcgdex',
@@ -22,7 +22,7 @@ export function criarFonteTcgdex({ http, lingua = 'pt', linguas = ['pt', 'en'] }
         try {
           const { dados } = await http.buscar(U('/sets', l), { ttl: DIAS7 });
           for (const s of dados) if (!out.has(s.id))
-            out.set(s.id, { id: s.id, nome: l === lingua ? s.name : `${s.name} (${l.toUpperCase()})`, total: s.cardCount?.total ?? s.cardCount?.official ?? null, lingua: l });
+            out.set(s.id, { id: s.id, nome: l === lingua ? s.name : `${s.name} (${l.toUpperCase()})`, total: s.cardCount?.total ?? s.cardCount?.official ?? null, oficial: s.cardCount?.official ?? null, lingua: l });
         } catch (e) { if (e.codigo === 'LIMITE_DIARIO') throw e; }
       }
       if (!out.size) throw new Error('Não consegui carregar as coleções agora.');
@@ -73,7 +73,7 @@ export function criarFonteTcgdex({ http, lingua = 'pt', linguas = ['pt', 'en'] }
 
     async detalhe(id, l = lingua) {
       const { dados: d } = await http.buscar(U('/cards/' + encodeURIComponent(id), l), { ttl: DIAS7 });
-      return { raridade: d.rarity || '', tipos: d.types || [], colecao: { id: d.set?.id, nome: d.set?.name || '' } };
+      return { raridade: d.rarity || '', tipos: d.types || [], totalImpresso: d.set?.cardCount?.official ?? null, colecao: { id: d.set?.id, nome: d.set?.name || '' } };
     },
   };
 }

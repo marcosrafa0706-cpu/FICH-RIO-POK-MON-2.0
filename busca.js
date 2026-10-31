@@ -116,42 +116,72 @@ $('#tsug').onclick = e => {
   $('#tn').value = b.dataset.n; $('#tsug').innerHTML = ''; pesquisar(true);
 };
 
+// "005/225" -> número 005 e total impresso 225 (a mesma numeração que está na carta).
+function lerNumero(txt) {
+  const m = String(txt).trim().match(/^([^\/\s]+)\s*\/\s*(\d+)$/);
+  return m ? { num: m[1], tot: +m[2] } : { num: String(txt).trim(), tot: null };
+}
+// Junta resultados sem repetir; se a mesma carta vier com e sem foto, fica a que tem foto.
+function mesclar(rs) {
+  const mapa = new Map(res.map(c => [chave(c), c]));
+  for (const r of rs) for (const c of r.itens) {
+    const k = chave(c), a = mapa.get(k);
+    if (!a) mapa.set(k, c);
+    else if (!a.imagem && c.imagem) mapa.set(k, { ...c, nome: a.lingua === 'pt' ? a.nome : c.nome });
+  }
+  res = [...mapa.values()];
+}
+const mostrarSemFoto = () => $('#tsf').checked;
+const visiveis = () => res.filter(c => mostrarSemFoto() || c.imagem).length;
+let auto = 0;
+
 async function pesquisar(nova) {
   if (carregando) return;
   carregando = true;
+  let mais = false;
   try {
-    if (nova) { pag = 1; res = []; $('#tg').scrollTop = 0; }
-    const nome = $('#tn').value.trim(), numero = $('#tnum').value.trim(), sel = colSel();
+    if (nova) { pag = 1; res = []; auto = 0; $('#tg').scrollTop = 0; }
+    const nome = $('#tn').value.trim(), { num, tot } = lerNumero($('#tnum').value), sel = colSel();
     if ($('#tcol').value.trim() && !sel) { $('#tst').textContent = 'Coleção não encontrada. Escolha uma da lista.'; return; }
     $('#tst').textContent = 'Buscando…';
-    const base = { nome, numero, pagina: pag, porPagina: numero && !sel ? 250 : 30 };
+    const base = { nome, numero: num, pagina: pag, porPagina: num && !sel ? 250 : 30 };
     const ls = fonteAtiva().linguas || [''];
-    // Pokémon sem coleção: busca em português e inglês e junta (a mesma carta tem o mesmo id nos dois).
-    const rs = sel
-      ? [await buscar({ ...base, colecao: sel.id, lingua: sel.lingua })]
-      : await Promise.all(ls.map(l => buscar({ ...base, lingua: l }).catch(erro => ({ itens: [], temMais: false, origem: 'cache', erro }))));
+    const falha = erro => ({ itens: [], temMais: false, origem: 'cache', erro });
+    let rs, nota = '';
+    if (sel) {
+      rs = [await buscar({ ...base, colecao: sel.id, lingua: sel.lingua })];
+      if (tot && sel.oficial && sel.oficial !== tot) nota = ` · aviso: esta coleção tem ${sel.oficial} cartas impressas, não ${tot}`;
+    } else {
+      const cand = tot ? SETS.filter(s => s.oficial === tot).slice(0, 8) : [];
+      if (cand.length) { // número completo: procura só nas coleções com esse total impresso
+        rs = await Promise.all(cand.map(s => buscar({ ...base, colecao: s.id, lingua: s.lingua }).catch(falha)));
+        nota = ` · procurando em ${cand.length} coleção(ões) com ${tot} cartas`;
+      } else {
+        rs = await Promise.all(ls.map(l => buscar({ ...base, lingua: l }).catch(falha)));
+        if (tot) nota = ` · nenhuma coleção com total ${tot}; usei só o número`;
+      }
+    }
     if (rs.every(r => r.erro)) throw rs[0].erro;
-    const vistos = new Set(res.map(chave));
-    for (const r of rs) for (const c of r.itens) if (!vistos.has(chave(c))) { vistos.add(chave(c)); res.push(c); }
+    mesclar(rs);
     $('#tmw').hidden = !rs.some(r => r.temMais);
-    const esp = res.filter(c => !numOk(c)).length;
-    $('#tst').textContent = `${res.length} carta(s)${$('#tmw').hidden ? '' : ' (role para ver mais)'}`
-      + (esp ? ` · ${esp} com número especial (ex.: TG01) não cabem no fichário` : '')
+    const v = visiveis(), ocultas = res.length - v;
+    $('#tst').textContent = `${v} carta(s)${$('#tmw').hidden ? '' : ' (role para ver mais)'}`
+      + (ocultas ? ` · ${ocultas} sem foto ocultas` : '') + nota
       + ` · ${rs.some(r => r.origem === 'rede') ? 'da rede' : 'do cache'} · ${restante()} requisições restantes hoje`
-      + (sel ? '' : ' · Dica: escolha a coleção para o número da carta bater com o bolso.');
+      + (sel || tot ? '' : ' · Dica: escolha a coleção ou digite o número completo (ex.: 005/225).');
     desenhar();
+    mais = !$('#tmw').hidden && v < 12 && auto < 4; // poucas cartas com foto: busca a próxima página sozinho
   } catch (e) { $('#tst').textContent = e.message || 'Erro ao buscar. Tente de novo.'; }
   finally { carregando = false; }
+  if (mais) { auto++; pag++; pesquisar(false); }
 }
+$('#tsf').onchange = () => desenhar();
 
 function desenhar() {
-  $('#tg').innerHTML = res.map((c, i) => {
-    const f = feitas.get(chave(c)), bloq = f || !numOk(c);
-    return `<div class="tc">
+  $('#tg').innerHTML = res.map((c, i) => ({ c, i })).filter(x => mostrarSemFoto() || x.c.imagem).map(({ c, i }) => `<div class="tc">
     ${c.imagem ? `<img src="${esc(c.imagem)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ni">sem imagem</div>'}
     <b>${esc(c.nome)}</b><small>nº ${esc(c.numero)}${c.lingua === 'en' ? ' · EN' : ''}</small>
-    <button class="p" data-i="${i}" data-t="1" ${bloq ? 'disabled' : ''}>${f === 't' ? '✓ Adicionada' : numOk(c) ? 'Tenho ✓' : 'nº especial'}</button><button data-i="${i}" data-t="0" ${bloq ? 'disabled' : ''}>${f === 'c' ? '✓ No catálogo' : 'Só catálogo'}</button></div>`;
-  }).join('');
+    <button class="p" data-i="${i}" data-t="1">Tenho ✓</button><button data-i="${i}" data-t="0">Só catálogo</button></div>`).join('');
 }
 // Imagem que falhar vira o espaço reservado com os dados da carta.
 $('#tg').addEventListener('error', e => { if (e.target.tagName === 'IMG') e.target.replaceWith(Object.assign(document.createElement('div'), { className: 'ni', textContent: 'sem imagem' })); }, true);
@@ -160,28 +190,36 @@ $('#binder').addEventListener('error', e => {
   if (e.target.tagName === 'IMG' && sl) { sl.classList.remove('hi'); e.target.outerHTML = phHTML(set(), +sl.dataset.n); }
 }, true);
 
+const livre = s => { for (let i = 1; i <= s.total; i++) if (!s.cards[i]) return i; return s.total + 1; };
+
+// A carta vai para o slot que VOCÊ escolher (campo "Colocar no slot"); vazio = próximo slot livre.
+// O número impresso na carta (ex.: 005/225) fica guardado só como informação.
 $('#tg').onclick = async e => {
   const b = e.target.closest('button[data-i]'); if (!b || b.disabled) return;
-  const c = res[+b.dataset.i], tenho = b.dataset.t === '1', s = set(), n = parseInt(c.numero, 10);
-  if (n > s.total) {
-    if (!confirm(`Esta carta é a nº ${n}, mas o fichário "${s.name}" tem ${s.total} cartas. Aumentar o fichário para ${n} cartas?`)) return;
-    s.total = n;
-  }
+  const c = res[+b.dataset.i], tenho = b.dataset.t === '1', s = set();
+  let n = parseInt($('#tslot').value, 10);
+  const manual = n >= 1;
+  if (!manual) n = livre(s);
+  if (n > s.total && !confirm(`O slot ${n} não existe: o fichário "${s.name}" tem ${s.total} slots. Aumentar para ${n}?`)) return;
+  if (tenho && s.cards[n] && !confirm(`O slot ${n} já tem ${s.cards[n].name || 'uma carta'}. Substituir?`)) return;
   const rotulo = b.textContent;
   b.disabled = true; b.textContent = '…';
   try {
     const d = c.det || await fonteAtiva().detalhe(c.id, c.lingua); // Scryfall/Lorcast/OPTCG já trazem os detalhes na lista
-    const dados = { name: c.nome, col: d.colecao.nome, type: tipoDe(d.tipos), rare: rareFrom(d.raridade), url: c.imagem };
-    if (tenho) s.cards[n] = { ...(s.cards[n] || {}), ...dados };
-    else { s.cat = s.cat || {}; s.cat[n] = { name: dados.name, col: dados.col, type: dados.type, rare: dados.rare }; }
+    const tot = d.totalImpresso ?? SETS.find(x => String(x.id) === String(d.colecao.id))?.oficial ?? null;
+    const dados = { name: c.nome, col: d.colecao.nome, type: tipoDe(d.tipos), rare: rareFrom(d.raridade), url: c.imagem, num: c.numero + (tot ? '/' + tot : '') };
+    if (n > s.total) s.total = n;
+    if (tenho) s.cards[n] = dados;
+    else { s.cat = s.cat || {}; s.cat[n] = { name: dados.name, col: dados.col, type: dados.type, rare: dados.rare, num: dados.num }; }
     s.jogo = s.jogo || JOGOS.find(j => j.fonte === c.fonte)?.id;
     save(); render();
-    feitas.set(chave(c), tenho ? 't' : 'c');
-    b.textContent = tenho ? '✓ Adicionada' : '✓ No catálogo';
-    b.parentElement.querySelectorAll('button').forEach(x => { x.disabled = true; });
-    aviso(tenho ? `${c.nome} (nº ${n}) adicionada ao fichário.` : `${c.nome} (nº ${n}) salva no catálogo.`);
+    if (manual) $('#tslot').value = n + 1; // facilita preencher em sequência
+    b.textContent = `✓ Slot ${n}`;
+    setTimeout(() => { b.textContent = rotulo; }, 2000);
+    aviso(tenho ? `${c.nome} colocada no slot ${n}.` : `${c.nome} salva no catálogo do slot ${n}.`);
   } catch (err) {
-    b.disabled = false; b.textContent = rotulo;
+    b.textContent = rotulo;
     aviso('Não consegui buscar os detalhes agora. Tente de novo.');
   }
+  b.disabled = false;
 };
