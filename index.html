@@ -157,6 +157,7 @@ body:not(.sh) #new{display:none}
   <p style="color:var(--mut);font-size:.85rem">Toque numa carta para registrar, adicionar foto, tipo e raridade. Deslize ou use as setas ◀ ▶ para virar a página.</p>
   <p style="color:var(--mut);font-size:.75rem">Cartas buscadas usam dados e imagens do <a href="https://tcgdex.dev" target="_blank" rel="noopener noreferrer">TCGdex</a>, <a href="https://scryfall.com" target="_blank" rel="noopener noreferrer">Scryfall</a>, <a href="https://lorcast.com" target="_blank" rel="noopener noreferrer">Lorcast</a> e <a href="https://www.optcgapi.com" target="_blank" rel="noopener noreferrer">OPTCG API</a>. Site de fã, sem ligação com The Pokémon Company, Wizards of the Coast, Disney, Bandai ou Nintendo.</p>
 </div>
+<input type="file" id="tff" accept="image/*" hidden>
 <div id="toast" popover="manual"></div>
 
 <dialog id="dc"><b id="dct"></b>
@@ -166,7 +167,7 @@ body:not(.sh) #new{display:none}
   <div style="flex:1"><label for="dcr">Raridade</label><select id="dcr"><option value="0">—</option><option value="1">★ Comum/Incomum</option><option value="2">★★ Rara/Holo</option><option value="3">★★★ Ultra/Secreta</option></select></div></div>
   <label>Imagem: só foto sua. Sem foto, o fichário mostra os dados da carta.</label>
   <div class="ph"><div class="pv" id="pv"></div>
-    <div class="btns" style="margin:0"><button id="fb">📷 Foto</button><button id="fx">Remover</button></div>
+    <div class="btns" style="margin:0"><button id="fb">📷 Minha foto</button><button id="fx">Remover</button><button id="dcf">🔎 Achar no catálogo</button></div>
     <input type="file" id="ff" accept="image/*" hidden></div>
   <div class="btns"><button class="p" id="dcy">Tenho ✓</button><button id="dcx">Limpar slot</button><button id="dcc">Fechar</button></div>
   <p style="margin:12px 0 0;font-size:.85rem"><a id="lk" target="_blank" rel="noopener noreferrer">Ver esta carta no Google Imagens ↗</a></p>
@@ -197,7 +198,7 @@ body:not(.sh) #new{display:none}
   <datalist id="tsets"></datalist>
   <label for="tslot">Colocar no slot nº</label><input id="tslot" type="number" min="1" placeholder="vazio = próximo slot livre">
   <label style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:.85rem"><input type="checkbox" id="tsf" style="width:auto"> Mostrar também cartas sem foto</label>
-  <div class="btns"><button class="p" id="tgo">Buscar</button><button id="tcl">Fechar</button></div>
+  <div class="btns"><button class="p" id="tgo">Buscar</button><button id="tfoto">📷 Identificar por foto</button><button id="tcl">Fechar</button></div>
   <p id="tst" style="font-size:.85rem;color:var(--mut)"></p>
   <div class="tg" id="tg"></div>
   <div class="btns" id="tmw" hidden><button id="tmore">Carregar mais</button></div>
@@ -487,6 +488,6 @@ const oe=openEd;openEd=function(i){oe(i);$('#ncol').value=i<0?'':(S.sets[i].cole
 const ok0=$('#nok').onclick;$('#nok').onclick=()=>{const v=$('#ncol').value.trim(),i=ei;ok0();const t=i<0?S.sets[S.sets.length-1]:S.sets[i];if(t){t.colecao=v;save();render()}};
 render();
 </script>
-<script type="module" src="busca.js?v=5"></script>
+<script type="module" src="busca.js?v=6"></script>
 </body>
 </html>

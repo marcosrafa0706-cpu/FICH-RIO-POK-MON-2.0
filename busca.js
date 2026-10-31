@@ -1,11 +1,12 @@
 // Liga o fichário (index.html) às fontes de cartas. Para trocar ou acrescentar
 // uma fonte, crie um adaptador (formato em catalogo.js) e registre-o aqui.
-import { criarLimitador, criarHttp } from './infra.js?v=5';
-import { criarFonteTcgdex } from './tcgdex.js?v=5';
-import { criarFonteScryfall } from './scryfall.js?v=5';
-import { criarFonteLorcast } from './lorcast.js?v=5';
-import { criarFonteOptcg } from './optcg.js?v=5';
-import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=5';
+import { criarLimitador, criarHttp } from './infra.js?v=6';
+import { criarFonteTcgdex } from './tcgdex.js?v=6';
+import { criarFonteScryfall } from './scryfall.js?v=6';
+import { criarFonteLorcast } from './lorcast.js?v=6';
+import { criarFonteOptcg } from './optcg.js?v=6';
+import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=6';
+import { iniciarFoto } from './foto.js?v=6';
 
 // Limites conservadores por fonte. `intervalo` = espera mínima entre requisições (ms).
 // Scryfall: a busca aceita ~2/s e o resto ~10/s; imagens (*.scryfall.io) não têm limite.
@@ -67,7 +68,7 @@ async function trocarJogo(id, salvar) {
   res = []; pag = 1;
   $('#tg').innerHTML = ''; $('#tcol').value = ''; $('#tsug').innerHTML = ''; $('#tmw').hidden = true;
   const a = fonteAtiva().atribuicao;
-  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v5`; // número da versão: confirma que os arquivos novos carregaram
+  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v6`; // número da versão: confirma que os arquivos novos carregaram
   await carregarColecoes();
 }
 
@@ -229,3 +230,6 @@ $('#tg').onclick = async e => {
   }
   b.disabled = false;
 };
+
+// Identificar carta por foto (botões na busca e no quadro da carta).
+iniciarFoto({ pesquisar: () => pesquisar(true), abrirBusca: () => $('#tbtn').onclick() });
