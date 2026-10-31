@@ -7,7 +7,8 @@
 //     colecoes(): Promise<[{ id, nome, total }]>,
 //     buscar({ nome, numero, colecao, pagina, porPagina }):
 //         Promise<{ itens:[Carta], temMais, origem }>,
-//     detalhe(id): Promise<{ raridade, tipos, colecao:{id,nome} }>
+//     detalhe(id, lingua): Promise<{ raridade, tipos, colecao:{id,nome} }>,
+//     nomes({ prefixo, colecao, lingua })?: Promise<[string]>   (opcional)
 //   }
 //   Carta = { id, nome, numero, imagem, colecao?, fonte }
 //   `imagem` é a URL base devolvida pela própria fonte (nada é baixado ou copiado).
@@ -29,3 +30,5 @@ export const fonteAtiva = () => fontes.get(ativa);
 export const listarFontes = () => [...fontes.values()].map(f => ({ id: f.id, nome: f.nome }));
 export const buscar = filtro => fonteAtiva().buscar(filtro);
 export const colecoes = () => fonteAtiva().colecoes();
+// Opcional: fontes sem sugestão de nomes simplesmente devolvem lista vazia.
+export const nomes = a => (fonteAtiva().nomes ? fonteAtiva().nomes(a) : Promise.resolve([]));

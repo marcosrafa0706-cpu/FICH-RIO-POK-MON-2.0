@@ -53,7 +53,7 @@ textarea{font-size:.8rem;min-height:80px;background:var(--bg)}
 .danger{color:#d33}
 .ph{display:flex;gap:10px;align-items:center}
 .pv{width:70px;aspect-ratio:5/7;border-radius:6px;background:var(--slot) center/cover;border:1px solid var(--line);flex:none}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:20px;opacity:0;transition:.3s;pointer-events:none;z-index:9}
+#toast{top:auto;right:auto;margin:0;border:0;position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:20px;opacity:0;transition:.3s;pointer-events:none;z-index:9}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 a{color:var(--acc)}
 .sr{display:flex;gap:8px;align-items:center;padding:6px;border:1px solid var(--line);border-radius:10px;margin-top:6px}
@@ -112,6 +112,7 @@ body:not(.sh) #new{display:none}
 #kt table{width:100%;border-collapse:collapse;font-size:.78rem}#kt td,#kt th{padding:3px 5px;border-bottom:1px solid var(--line);text-align:left}
 #kt{max-height:34vh;overflow:auto}
 #dt{max-width:640px}
+.sug{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.sug:empty{display:none}.sug button{padding:3px 11px;border-radius:16px;font-size:.82rem}
 .tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:8px;max-height:44vh;overflow:auto}
 .tc{display:flex;flex-direction:column;gap:3px;font-size:.75rem;text-align:center}
 .tc img,.tc .ni{width:100%;aspect-ratio:5/7;object-fit:cover;border-radius:6px;background:var(--slot)}
@@ -155,7 +156,7 @@ body:not(.sh) #new{display:none}
   <p style="color:var(--mut);font-size:.85rem">Toque numa carta para registrar, adicionar foto, tipo e raridade. Deslize ou use as setas ◀ ▶ para virar a página.</p>
   <p style="color:var(--mut);font-size:.75rem">Cartas buscadas usam dados e imagens do <a href="https://tcgdex.dev" target="_blank" rel="noopener noreferrer">TCGdex</a>. Site de fã, sem ligação com The Pokémon Company, Nintendo ou Game Freak.</p>
 </div>
-<div id="toast"></div>
+<div id="toast" popover="manual"></div>
 
 <dialog id="dc"><b id="dct"></b>
   <label for="dcn">Nome</label><input id="dcn" placeholder="Ex.: Pikachu">
@@ -186,7 +187,8 @@ body:not(.sh) #new{display:none}
 
 <dialog id="dt"><b>🔎 Buscar cartas (TCGdex)</b>
   <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Busque por nome, número e/ou coleção. As imagens vêm direto do TCGdex, sem cópia no seu site.</p>
-  <label for="tn">Nome</label><input id="tn" placeholder="Ex.: Pikachu">
+  <label for="tn">Nome</label><input id="tn" placeholder="Ex.: Pikachu" autocomplete="off">
+  <div class="sug" id="tsug"></div>
   <div class="row" style="margin:0"><div style="flex:1"><label for="tnum">Número</label><input id="tnum" placeholder="Ex.: 25"></div>
   <div style="flex:2"><label for="tcol">Coleção</label><input id="tcol" list="tsets" placeholder="Digite para ver as coleções"></div></div>
   <datalist id="tsets"></datalist>
@@ -232,7 +234,7 @@ return{cur:0,sets:[{name:'Minha coleção',total:150,per:9,cards:{}}]}}
 function save(){try{localStorage.setItem('fichario-pokemon',JSON.stringify(S));return true}catch(e){toast('Armazenamento cheio: faça backup e remova algumas fotos');return false}}
 let S=load(),page=0,filt='all',q='',cur=null,img='',anim=0;
 const set=()=>S.sets[S.cur],wide=()=>innerWidth>=700;
-let tt;function toast(m){if(/completa|importadas/.test(m))confetti();const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
+let tt;function toast(m){if(/completa|importadas/.test(m))confetti();const t=$('#toast');t.textContent=m;t.classList.add('on');try{t.showPopover()}catch(e){}clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('on');setTimeout(()=>{try{t.hidePopover()}catch(e){}},350)},2600)}
 function render(){
   if(view==='shelf'){document.body.classList.add('sh');drawShelf();return}
   document.body.classList.remove('sh');
