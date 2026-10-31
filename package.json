@@ -1,0 +1,8 @@
+{
+  "name": "ficharios",
+  "version": "0.8.0",
+  "private": true,
+  "type": "module",
+  "description": "Fichário digital de cartas (versão hospedável, sem servidor). Testes: npm test",
+  "scripts": { "test": "node --test" }
+}
