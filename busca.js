@@ -1,11 +1,11 @@
 // Liga o fichário (index.html) às fontes de cartas. Para trocar ou acrescentar
 // uma fonte, crie um adaptador (formato em catalogo.js) e registre-o aqui.
-import { criarLimitador, criarHttp } from './infra.js?v=4';
-import { criarFonteTcgdex } from './tcgdex.js?v=4';
-import { criarFonteScryfall } from './scryfall.js?v=4';
-import { criarFonteLorcast } from './lorcast.js?v=4';
-import { criarFonteOptcg } from './optcg.js?v=4';
-import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=4';
+import { criarLimitador, criarHttp } from './infra.js?v=5';
+import { criarFonteTcgdex } from './tcgdex.js?v=5';
+import { criarFonteScryfall } from './scryfall.js?v=5';
+import { criarFonteLorcast } from './lorcast.js?v=5';
+import { criarFonteOptcg } from './optcg.js?v=5';
+import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=5';
 
 // Limites conservadores por fonte. `intervalo` = espera mínima entre requisições (ms).
 // Scryfall: a busca aceita ~2/s e o resto ~10/s; imagens (*.scryfall.io) não têm limite.
@@ -67,7 +67,7 @@ async function trocarJogo(id, salvar) {
   res = []; pag = 1;
   $('#tg').innerHTML = ''; $('#tcol').value = ''; $('#tsug').innerHTML = ''; $('#tmw').hidden = true;
   const a = fonteAtiva().atribuicao;
-  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v4`; // número da versão: confirma que os arquivos novos carregaram
+  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v5`; // número da versão: confirma que os arquivos novos carregaram
   await carregarColecoes();
 }
 
@@ -186,7 +186,7 @@ $('#tsf').onchange = () => desenhar();
 function desenhar() {
   $('#tg').innerHTML = res.map((c, i) => ({ c, i })).filter(x => mostrarSemFoto() || x.c.imagem).map(({ c, i }) => `<div class="tc">
     ${c.imagem ? `<img src="${esc(c.imagem)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ni">sem imagem</div>'}
-    <b>${esc(c.nome)}</b><small>nº ${esc(c.numero)}${c.lingua === 'en' ? ' · EN' : ''}</small>
+    <b>${esc(c.nome)}</b><small>nº ${esc(c.numero)}${c.lingua === 'en' ? ' · EN' : ''}</small>${c.fonte === 'tcgdex' || c.fonte === 'optcg' ? `<small style="color:var(--mut)">${esc(c.id)}</small>` : ''}
     <button class="p" data-i="${i}" data-t="1">Tenho ✓</button><button data-i="${i}" data-t="0">Só catálogo</button></div>`).join('');
 }
 // Imagem que falhar vira o espaço reservado com os dados da carta.
@@ -213,7 +213,7 @@ $('#tg').onclick = async e => {
   try {
     const d = c.det || await fonteAtiva().detalhe(c.id, c.lingua); // Scryfall/Lorcast/OPTCG já trazem os detalhes na lista
     const tot = d.totalImpresso ?? SETS.find(x => String(x.id) === String(d.colecao.id))?.oficial ?? null;
-    const dados = { name: c.nome, col: d.colecao.nome, type: tipoDe(d.tipos), rare: rareFrom(d.raridade), url: c.imagem, num: c.numero + (tot ? '/' + tot : '') };
+    const dados = { name: c.nome, col: d.colecao.nome, type: tipoDe(d.tipos), rare: rareFrom(d.raridade), url: c.imagem, num: /^\d+$/.test(c.numero) && tot ? c.numero + '/' + tot : c.numero }; // número especial (XY123) não leva total
     if (n > s.total) s.total = n;
     if (tenho) s.cards[n] = dados;
     else { s.cat = s.cat || {}; s.cat[n] = { name: dados.name, col: dados.col, type: dados.type, rare: dados.rare, num: dados.num }; }

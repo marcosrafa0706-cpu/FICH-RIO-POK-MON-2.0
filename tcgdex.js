@@ -3,7 +3,8 @@
 // Cada carta/coleção existe em vários idiomas; a mesma carta tem o mesmo id em
 // todos eles. Por isso o adaptador aceita `lingua` em cada chamada.
 const BASE = 'https://api.tcgdex.net/v2';
-const semZeros = s => String(s ?? '').trim().replace(/^0+(?=\d)/, '');
+// Compara números sem diferenciar maiúsculas/minúsculas nem zeros à esquerda (005 = 5, xy123 = XY123).
+const semZeros = s => String(s ?? '').trim().toUpperCase().replace(/^0+(?=\d)/, '');
 const DIAS7 = 7 * 864e5;
 
 export function criarFonteTcgdex({ http, lingua = 'pt', linguas = ['pt', 'en'] }) {
@@ -75,6 +76,14 @@ export function criarFonteTcgdex({ http, lingua = 'pt', linguas = ['pt', 'en'] }
     // Código da carta no TCGdex, ex.: "sv01-001" ou "swsh3-136". Devolve null se o texto não parece um código.
     async porCodigo(codigo, { lingua: l = lingua } = {}) {
       const cod = String(codigo).trim();
+      // Número especial impresso na carta, ex.: XY123, SM05, TG01, SWSH001 (promos e galerias). Procura em todas as coleções.
+      if (/^[a-z]{1,6}\d{1,4}[a-z]?$/i.test(cod)) {
+        const q = new URLSearchParams({ localId: 'eq:' + cod.toUpperCase(), 'pagination:page': 1, 'pagination:itemsPerPage': 50 });
+        try {
+          const r = await http.buscar(U('/cards?' + q, l), { ttl: DIAS7 });
+          return { itens: r.dados.map(c => norm(c, l)), temMais: false, origem: r.origem };
+        } catch (e) { if (/^HTTP 404/.test(e.message)) return { itens: [], temMais: false, origem: 'rede' }; throw e; }
+      }
       if (!/^[a-z0-9.]*[a-z][a-z0-9.]*-[a-z0-9]+$/i.test(cod)) return null;
       try {
         const r = await http.buscar(U('/cards/' + encodeURIComponent(cod), l), { ttl: DIAS7 });
