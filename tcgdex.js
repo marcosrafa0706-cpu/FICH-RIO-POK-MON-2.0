@@ -7,12 +7,13 @@ const semZeros = s => String(s ?? '').trim().replace(/^0+(?=\d)/, '');
 const DIAS7 = 7 * 864e5;
 
 export function criarFonteTcgdex({ http, lingua = 'pt', linguas = ['pt', 'en'] }) {
-  const U = (p, l) => `${BASE}/${l}${p}`;
-  const norm = (c, l) => ({ id: c.id, nome: c.name || '', numero: c.localId || '', imagem: c.image ? c.image + '/low.webp' : '', lingua: l, fonte: 'tcgdex' });
+  const U = (p, l) => `${BASE}/${l || lingua}${p}`; // idioma vazio = idioma padrão
+  const norm = (c, l) => ({ id: c.id, nome: c.name || '', numero: c.localId || '', imagem: c.image ? c.image + '/low.webp' : '', lingua: l || lingua, fonte: 'tcgdex' });
 
   return {
     id: 'tcgdex',
     nome: 'TCGdex',
+    linguas, // idiomas pesquisados em paralelo (busca.js lê esta lista)
     atribuicao: { texto: 'Dados e imagens: TCGdex', url: 'https://tcgdex.dev' },
 
     // Une as coleções de todos os idiomas (português primeiro).
