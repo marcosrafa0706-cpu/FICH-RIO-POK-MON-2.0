@@ -43,6 +43,16 @@ export function criarFonteLorcast({ http }) {
       const { dados } = await http.buscar(`${BASE}/cards/search?` + new URLSearchParams({ q: prefixo.trim() }), { ttl: 864e5 });
       return [...new Set(lista(dados).map(c => c.name))].slice(0, 10);
     },
+    // Código do Lorcana: coleção + número, ex.: "1/207" (coleção 1, carta 207).
+    async porCodigo(codigo) {
+      const m = String(codigo).trim().match(/^(\w{1,6})[\s\/\-]+(\d+)$/);
+      if (!m) return null;
+      try {
+        const r = await http.buscar(`${BASE}/cards/${encodeURIComponent(m[1])}/${m[2]}`, { ttl: 7 * 864e5 });
+        const c = Array.isArray(r.dados) || r.dados?.results ? lista(r.dados)[0] : r.dados;
+        return { itens: c ? [norm(c)] : [], temMais: false, origem: r.origem };
+      } catch (e) { if (/^HTTP 404/.test(e.message)) return { itens: [], temMais: false, origem: 'rede' }; throw e; }
+    },
     async detalhe() { throw new Error('Detalhes já vêm na lista do Lorcast.'); },
   };
 }

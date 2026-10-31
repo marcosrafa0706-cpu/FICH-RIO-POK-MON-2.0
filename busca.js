@@ -1,11 +1,11 @@
 // Liga o fichário (index.html) às fontes de cartas. Para trocar ou acrescentar
 // uma fonte, crie um adaptador (formato em catalogo.js) e registre-o aqui.
-import { criarLimitador, criarHttp } from './infra.js?v=3';
-import { criarFonteTcgdex } from './tcgdex.js?v=3';
-import { criarFonteScryfall } from './scryfall.js?v=3';
-import { criarFonteLorcast } from './lorcast.js?v=3';
-import { criarFonteOptcg } from './optcg.js?v=3';
-import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=3';
+import { criarLimitador, criarHttp } from './infra.js?v=4';
+import { criarFonteTcgdex } from './tcgdex.js?v=4';
+import { criarFonteScryfall } from './scryfall.js?v=4';
+import { criarFonteLorcast } from './lorcast.js?v=4';
+import { criarFonteOptcg } from './optcg.js?v=4';
+import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=4';
 
 // Limites conservadores por fonte. `intervalo` = espera mínima entre requisições (ms).
 // Scryfall: a busca aceita ~2/s e o resto ~10/s; imagens (*.scryfall.io) não têm limite.
@@ -67,7 +67,7 @@ async function trocarJogo(id, salvar) {
   res = []; pag = 1;
   $('#tg').innerHTML = ''; $('#tcol').value = ''; $('#tsug').innerHTML = ''; $('#tmw').hidden = true;
   const a = fonteAtiva().atribuicao;
-  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v3`; // número da versão: confirma que os arquivos novos carregaram
+  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v4`; // número da versão: confirma que os arquivos novos carregaram
   await carregarColecoes();
 }
 
@@ -148,10 +148,16 @@ async function pesquisar(nova) {
     const ls = fonteAtiva().linguas || [''];
     const falha = erro => ({ itens: [], temMais: false, origem: 'cache', erro });
     let rs, nota = '';
-    if (sel) {
+    // Pesquisa só pelo código: Nome vazio + código da carta no campo Número (ex.: sv01-001, OP01-001, mkm 123).
+    const cod = $('#tnum').value.trim(), fa = fonteAtiva();
+    const rc = !nome && !sel && cod && fa.porCodigo ? await Promise.all(ls.map(l => fa.porCodigo(cod, { lingua: l }).catch(falha))) : [];
+    if (rc.length && rc.every(r => r !== null)) {
+      rs = rc; nota = ` · código ${cod}`;
+    } else if (sel) {
       rs = [await buscar({ ...base, colecao: sel.id, lingua: sel.lingua })];
       if (tot && sel.oficial && sel.oficial !== tot) nota = ` · aviso: esta coleção tem ${sel.oficial} cartas impressas, não ${tot}`;
     } else {
+      if (!nome && !tot) { $('#tst').textContent = 'Para pesquisar só pelo código, digite o número completo (ex.: 005/225) ou o código da carta (ex.: sv01-001).'; return; }
       const cand = tot ? SETS.filter(s => s.oficial === tot).slice(0, 8) : [];
       if (cand.length) { // número completo: procura só nas coleções com esse total impresso
         rs = await Promise.all(cand.map(s => buscar({ ...base, colecao: s.id, lingua: s.lingua }).catch(falha)));

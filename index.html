@@ -191,8 +191,9 @@ body:not(.sh) #new{display:none}
   <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Busque por nome, número e/ou coleção. As imagens vêm direto da fonte de cada jogo, sem cópia no seu site.</p>
   <label for="tn">Nome</label><input id="tn" placeholder="Ex.: Pikachu" autocomplete="off">
   <div class="sug" id="tsug"></div>
-  <div class="row" style="margin:0"><div style="flex:1"><label for="tnum">Número</label><input id="tnum" placeholder="Ex.: 005/225"></div>
+  <div class="row" style="margin:0"><div style="flex:2"><label for="tnum">Número ou código</label><input id="tnum" placeholder="Ex.: 005/225"></div>
   <div style="flex:2"><label for="tcol">Coleção</label><input id="tcol" list="tsets" placeholder="Digite para ver as coleções"></div></div>
+  <p style="font-size:.78rem;color:var(--mut);margin:6px 0 0">Só pelo código: deixe o Nome vazio e digite o número completo (005/225) ou o código da carta (sv01-001, OP01-001, mkm 123).</p>
   <datalist id="tsets"></datalist>
   <label for="tslot">Colocar no slot nº</label><input id="tslot" type="number" min="1" placeholder="vazio = próximo slot livre">
   <label style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:.85rem"><input type="checkbox" id="tsf" style="width:auto"> Mostrar também cartas sem foto</label>
@@ -486,6 +487,6 @@ const oe=openEd;openEd=function(i){oe(i);$('#ncol').value=i<0?'':(S.sets[i].cole
 const ok0=$('#nok').onclick;$('#nok').onclick=()=>{const v=$('#ncol').value.trim(),i=ei;ok0();const t=i<0?S.sets[S.sets.length-1]:S.sets[i];if(t){t.colecao=v;save();render()}};
 render();
 </script>
-<script type="module" src="busca.js?v=3"></script>
+<script type="module" src="busca.js?v=4"></script>
 </body>
 </html>

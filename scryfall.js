@@ -41,6 +41,15 @@ export function criarFonteScryfall({ http }) {
         return (dados.data || []).slice(0, 10);
       } catch (e) { if (vazio(e)) return []; throw e; }
     },
+    // Código do Magic: coleção + número, ex.: "mkm 123" ou "mkm-123".
+    async porCodigo(codigo) {
+      const m = String(codigo).trim().match(/^((?=[a-z0-9]*[a-z])[a-z0-9]{2,6})[\s\-\/]+(\d+[a-z★]*)$/i);
+      if (!m) return null;
+      try {
+        const r = await http.buscar(`${BASE}/cards/${m[1].toLowerCase()}/${encodeURIComponent(m[2])}`, { ttl: 864e5 });
+        return { itens: [norm(r.dados)], temMais: false, origem: r.origem };
+      } catch (e) { if (vazio(e)) return { itens: [], temMais: false, origem: 'rede' }; throw e; }
+    },
     async detalhe() { throw new Error('Detalhes já vêm na lista do Scryfall.'); },
   };
 }

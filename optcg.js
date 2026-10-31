@@ -50,6 +50,17 @@ export function criarFonteOptcg({ http }) {
       const { itens } = await cartas(colecao), p = prefixo.trim().toLowerCase();
       return [...new Set(itens.map(c => c.nome).filter(x => x.toLowerCase().includes(p)))].slice(0, 10);
     },
+    // Código do One Piece, ex.: "OP01-001" ou "ST01-005".
+    async porCodigo(codigo) {
+      const cod = String(codigo).trim().toUpperCase();
+      if (!/^[A-Z]{1,3}\d{0,2}-\d{2,3}$/.test(cod)) return null;
+      try {
+        const r = await http.buscar(`${BASE}/sets/card/${encodeURIComponent(cod)}/`, { ttl: 7 * 864e5 });
+        const d = r.dados;
+        const l = Array.isArray(d) ? d : (d?.results || d?.data || (d && (d.card_name || d.name) ? [d] : []));
+        return { itens: l.map(norm), temMais: false, origem: r.origem };
+      } catch (e) { if (/^HTTP 404/.test(e.message)) return { itens: [], temMais: false, origem: 'rede' }; throw e; }
+    },
     async detalhe() { throw new Error('Detalhes já vêm na lista da OPTCG API.'); },
   };
 }

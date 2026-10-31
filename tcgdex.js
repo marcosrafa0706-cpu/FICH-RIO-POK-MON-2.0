@@ -72,6 +72,19 @@ export function criarFonteTcgdex({ http, lingua = 'pt', linguas = ['pt', 'en'] }
       return out.sort((a, b) => ini(a) - ini(b) || a.localeCompare(b)).slice(0, 10);
     },
 
+    // Código da carta no TCGdex, ex.: "sv01-001" ou "swsh3-136". Devolve null se o texto não parece um código.
+    async porCodigo(codigo, { lingua: l = lingua } = {}) {
+      const cod = String(codigo).trim();
+      if (!/^[a-z0-9.]*[a-z][a-z0-9.]*-[a-z0-9]+$/i.test(cod)) return null;
+      try {
+        const r = await http.buscar(U('/cards/' + encodeURIComponent(cod), l), { ttl: DIAS7 });
+        const d = r.dados;
+        if (!d || !d.id) return { itens: [], temMais: false, origem: r.origem };
+        const col = { id: d.set?.id, nome: d.set?.name || '' };
+        return { itens: [{ ...norm(d, l), colecao: col, det: { raridade: d.rarity || '', tipos: d.types || [], totalImpresso: d.set?.cardCount?.official ?? null, colecao: col } }], temMais: false, origem: r.origem };
+      } catch (e) { if (/^HTTP 404/.test(e.message)) return { itens: [], temMais: false, origem: 'rede' }; throw e; }
+    },
+
     async detalhe(id, l = lingua) {
       const { dados: d } = await http.buscar(U('/cards/' + encodeURIComponent(id), l), { ttl: DIAS7 });
       return { raridade: d.rarity || '', tipos: d.types || [], totalImpresso: d.set?.cardCount?.official ?? null, colecao: { id: d.set?.id, nome: d.set?.name || '' } };
