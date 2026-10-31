@@ -13,7 +13,7 @@ export function criarFonteScryfall({ http }) {
     colecao: { id: c.set, nome: c.set_name },
     det: { raridade: c.rarity || '', tipos: cores(c), colecao: { id: c.set, nome: c.set_name } }, // já vem na lista: sem 2ª requisição
   });
-  const vazio = e => e && e.message === 'HTTP 404'; // o Scryfall responde 404 quando não há resultados
+  const vazio = e => e && /^HTTP 404/.test(e.message); // o Scryfall responde 404 quando não há resultados
 
   return {
     id: 'scryfall', nome: 'Scryfall (Magic)', linguas: [''],

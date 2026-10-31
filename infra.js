@@ -86,7 +86,7 @@ export function criarHttp({ limitador, ttlPadrao = 24 * 3600e3, tentativas = 3 }
             await new Promise(s => setTimeout(s, espera));
             continue;
           }
-          if (!r.ok) throw Object.assign(new Error('HTTP ' + r.status), { codigo: 'FATAL' });
+          if (!r.ok) throw Object.assign(new Error('HTTP ' + r.status + ' em ' + new URL(url).pathname), { codigo: 'FATAL' });
           const dados = await r.json();
           await cache.set(url, dados, ttl);
           return { dados, origem: 'rede' };

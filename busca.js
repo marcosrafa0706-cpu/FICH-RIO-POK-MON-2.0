@@ -1,11 +1,11 @@
 // Liga o fichário (index.html) às fontes de cartas. Para trocar ou acrescentar
 // uma fonte, crie um adaptador (formato em catalogo.js) e registre-o aqui.
-import { criarLimitador, criarHttp } from './infra.js';
-import { criarFonteTcgdex } from './tcgdex.js';
-import { criarFonteScryfall } from './scryfall.js';
-import { criarFonteLorcast } from './lorcast.js';
-import { criarFonteOptcg } from './optcg.js';
-import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js';
+import { criarLimitador, criarHttp } from './infra.js?v=3';
+import { criarFonteTcgdex } from './tcgdex.js?v=3';
+import { criarFonteScryfall } from './scryfall.js?v=3';
+import { criarFonteLorcast } from './lorcast.js?v=3';
+import { criarFonteOptcg } from './optcg.js?v=3';
+import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=3';
 
 // Limites conservadores por fonte. `intervalo` = espera mínima entre requisições (ms).
 // Scryfall: a busca aceita ~2/s e o resto ~10/s; imagens (*.scryfall.io) não têm limite.
@@ -67,7 +67,7 @@ async function trocarJogo(id, salvar) {
   res = []; pag = 1;
   $('#tg').innerHTML = ''; $('#tcol').value = ''; $('#tsug').innerHTML = ''; $('#tmw').hidden = true;
   const a = fonteAtiva().atribuicao;
-  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a>`;
+  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v3`; // número da versão: confirma que os arquivos novos carregaram
   await carregarColecoes();
 }
 
