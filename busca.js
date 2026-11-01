@@ -1,13 +1,13 @@
 // Liga o fichário (index.html) às fontes de cartas. Para trocar ou acrescentar
 // uma fonte, crie um adaptador (formato em catalogo.js) e registre-o aqui.
-import { criarLimitador, criarHttp } from './infra.js?v=8';
-import { criarFonteTcgdex } from './tcgdex.js?v=8';
-import { criarFonteScryfall } from './scryfall.js?v=8';
-import { criarFonteLorcast } from './lorcast.js?v=8';
-import { criarFonteOptcg } from './optcg.js?v=8';
-import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=8';
-import { iniciarFoto } from './foto.js?v=8';
-import { sim } from './util.js?v=8';
+import { criarLimitador, criarHttp } from './infra.js?v=9';
+import { criarFonteTcgdex } from './tcgdex.js?v=9';
+import { criarFonteScryfall } from './scryfall.js?v=9';
+import { criarFonteLorcast } from './lorcast.js?v=9';
+import { criarFonteOptcg } from './optcg.js?v=9';
+import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=9';
+import { iniciarFoto } from './foto.js?v=9';
+import { sim } from './util.js?v=9';
 
 // Limites conservadores por fonte. `intervalo` = espera mínima entre requisições (ms).
 // Scryfall: a busca aceita ~2/s e o resto ~10/s; imagens (*.scryfall.io) não têm limite.
@@ -69,7 +69,7 @@ async function trocarJogo(id, salvar) {
   res = []; pag = 1;
   $('#tg').innerHTML = ''; $('#tcol').value = ''; $('#tsug').innerHTML = ''; $('#tmw').hidden = true;
   const a = fonteAtiva().atribuicao;
-  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v8`; // número da versão: confirma que os arquivos novos carregaram
+  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v9`; // número da versão: confirma que os arquivos novos carregaram
   await carregarColecoes();
 }
 
@@ -195,7 +195,7 @@ $('#tsf').onchange = () => desenhar();
 function desenhar() {
   $('#tg').innerHTML = res.map((c, i) => ({ c, i })).filter(x => mostrarSemFoto() || x.c.imagem).map(({ c, i }) => `<div class="tc">
     ${c.imagem ? `<img src="${esc(c.imagem)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ni">sem imagem</div>'}
-    ${rank && i === 0 && c.sim >= .55 ? '<small style="color:var(--ok)">✔ mais provável</small>' : ''}<b>${esc(c.nome)}</b><small>nº ${esc(c.numero)}${c.lingua === 'en' ? ' · EN' : ''}</small>${c.fonte === 'tcgdex' || c.fonte === 'optcg' ? `<small style="color:var(--mut)">${esc(c.id)}</small>` : ''}
+    ${rank && i === 0 && c.sim >= .55 ? '<small style="color:var(--ok)">Mais provável</small>' : ''}<b>${esc(c.nome)}</b><small>nº ${esc(c.numero)}${c.lingua === 'en' ? ' · EN' : ''}</small>${c.fonte === 'tcgdex' || c.fonte === 'optcg' ? `<small style="color:var(--mut)">${esc(c.id)}</small>` : ''}
     <button class="p" data-i="${i}" data-t="1">Tenho ✓</button><button data-i="${i}" data-t="0">Só catálogo</button><button data-i="${i}" data-t="2" aria-label="Adicionar à lista de desejos">♡</button></div>`).join('');
 }
 // Imagem que falhar vira o espaço reservado com os dados da carta.

@@ -9,7 +9,7 @@
 //    com texto escuro e claro, binarização local (Otsu) e votação entre as leituras;
 //  - corrige confusões comuns (O→0, I→1, S→5, B→8) e valida o formato 005/225 ou XY123;
 //  - se o nome vier errado, tenta variações e ordena os resultados por semelhança de nome.
-import { lerNumeroTxt, lerNome, variantes } from './util.js?v=8';
+import { lerNumeroTxt, lerNome, variantes } from './util.js?v=9';
 const CDN = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
 let lib, worker, pesquisar, abrirBusca, ranquear, destino = null, rodadas = 0;
 
@@ -106,7 +106,7 @@ async function lerCarta(w, c, st) {
     for (const rot of ordem) {
       const base = rot ? girar(c, rot) : c;
       for (const inset of [0, .05]) {
-        st(`🔍 Lendo a carta… (tentativa ${rodadas ? Math.ceil(rodadas / 6) : 1})`);
+        st(`Lendo a carta… (tentativa ${rodadas ? Math.ceil(rodadas / 6) : 1})`);
         const r = await tentar(w, base, inset);
         if (r.num) return r;                    // o número é o dado mais confiável
         if (r.nome && (!melhor || r.conf > melhor.conf)) melhor = r;
@@ -127,7 +127,7 @@ async function processar(canvas, slot) {
   const st = m => { $('#tst').textContent = m; };
   if (!$('#dt').open) await abrirBusca();
   if (slot) $('#tslot').value = slot;
-  st('📷 Preparando o leitor… na primeira vez leva uns 15 segundos para baixar.');
+  st('Preparando o leitor… na primeira vez leva uns 15 segundos para baixar.');
   try {
     const w = await leitor();
     const { num, tot, nome } = await lerCarta(w, canvas, st);

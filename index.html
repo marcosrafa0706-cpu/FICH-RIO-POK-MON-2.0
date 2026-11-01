@@ -13,13 +13,13 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>
-// Tema salvo (evita piscar) e registro simples de erros para suporte (⚙️ > Relatório de erros).
+// Tema salvo (evita piscar) e registro simples de erros para suporte (> Relatório de erros).
 (function(){try{var t=localStorage.getItem('fichario-tema');if(t)document.documentElement.dataset.theme=t}catch(e){}
 function reg(m){try{var l=JSON.parse(localStorage.getItem('fichario-erros')||'[]');l.push({t:new Date().toISOString(),m:String(m).slice(0,300)});localStorage.setItem('fichario-erros',JSON.stringify(l.slice(-20)))}catch(e){}}
 addEventListener('error',function(e){reg(e.message+' ('+String(e.filename||'').split('/').pop()+':'+e.lineno+')')});
 addEventListener('unhandledrejection',function(e){reg('Promessa: '+(e.reason&&e.reason.message||e.reason))})})();
 </script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#f3efe8;--fg:#1d1b20;--mut:#6b6670;--cover:#c8312b;--page:#fffdf8;--slot:#ece7dd;--line:#d8d1c3;--acc:#2a5bd7;--ok:#1f9d55}
@@ -150,21 +150,101 @@ body:not(.sh) #new{display:none}
 .wi img,.wi .wp{width:44px;aspect-ratio:5/7;object-fit:cover;border-radius:4px;background:var(--slot);flex:none}.wt{flex:1;min-width:0;display:flex;flex-direction:column}.wt small{color:var(--mut)}
 .wi button{padding:4px 9px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== v9: visual de colecionador (couro, latão e papel de arquivo) ===== */
+:root{--noise:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/></svg>");
+--bg:#f2efe8;--fg:#1b1a18;--mut:#6c6860;--cover:#2a211c;--page:#faf8f3;--slot:#ece8de;--line:#d9d3c5;--acc:#8a6a2c;--ok:#4f8f6b;--gold:#8a6a2c;--gold2:#b8943f;--panel:#fbf9f4}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e0f12;--fg:#ebe8e0;--mut:#8d929c;--cover:#1b1512;--page:#15171c;--slot:#101216;--line:#2a2e37;--acc:#c9a45c;--ok:#6fbf8e;--gold:#c9a45c;--gold2:#e7cf94;--panel:#16181d}}
+:root[data-theme="dark"]{--bg:#0e0f12;--fg:#ebe8e0;--mut:#8d929c;--cover:#1b1512;--page:#15171c;--slot:#101216;--line:#2a2e37;--acc:#c9a45c;--ok:#6fbf8e;--gold:#c9a45c;--gold2:#e7cf94;--panel:#16181d}
+body{font:400 15px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;background:radial-gradient(900px 480px at 85% -8%,color-mix(in srgb,var(--gold) 9%,transparent),transparent),var(--bg)}
+.wrap{padding:18px 16px 40px}
+.top{padding:4px 0 14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+h1.wm{display:flex;flex-direction:column;gap:6px;font:500 1.75rem/1 Fraunces,Georgia,"Times New Roman",serif;letter-spacing:.005em}
+h1.wm small{font:500 .6rem/1 Inter,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+#bt{font:500 1.05rem Fraunces,Georgia,serif;color:var(--gold)}
+button,select,input,textarea{font-family:Inter,system-ui,sans-serif}
+button{font-weight:500;font-size:.86rem;letter-spacing:.02em;border-radius:10px;background:transparent;border:1px solid var(--line);color:var(--fg);padding:9px 14px;box-shadow:none;transition:border-color .15s,background .15s,transform .1s}
+button:hover:not(:disabled){border-color:var(--gold)}
+button.p{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#17130a;border:0;box-shadow:0 1px 0 #ffffff55 inset,0 8px 18px -10px var(--gold)}
+button:active:not(:disabled){transform:scale(.98)}
+button.ic{width:40px;height:40px;padding:0;display:inline-grid;place-items:center;font-size:1.05rem;color:var(--mut)}
+button.ic:hover{color:var(--gold)}
+select,input,textarea{background:color-mix(in srgb,var(--fg) 4%,transparent);border:1px solid var(--line);border-radius:10px;color:var(--fg)}
+select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid color-mix(in srgb,var(--gold) 60%,transparent);outline-offset:1px;border-color:var(--gold)}
+.stat{align-items:baseline;font:500 .76rem 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.05em;color:var(--mut)}
+#lvl{font:italic 500 .98rem Fraunces,Georgia,serif;letter-spacing:0;color:var(--fg)}
+#pct{font-size:1.05rem;color:var(--gold)}
+.bar{height:3px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{background:linear-gradient(90deg,var(--gold),var(--gold2));animation:none;border-radius:3px;min-width:0}
+.bar i::after{display:none}
+.chip{border-radius:999px;padding:6px 14px;font-size:.78rem;color:var(--mut)}
+.chip.on{background:color-mix(in srgb,var(--gold) 13%,transparent);border-color:var(--gold);color:var(--gold)}
+#q{border-radius:999px;padding:8px 16px}
+#shl{font:italic 400 .98rem Fraunces,Georgia,serif;color:var(--mut)}
+/* capa do fichário (estante) */
+.sh #shelf{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:24px}
+.bk{aspect-ratio:3/4.1;border-radius:4px 12px 12px 4px;padding:0 0 0 26px;align-items:stretch;color:#f3ecd9;
+ background:var(--noise),linear-gradient(150deg,color-mix(in srgb,var(--cv) 100%,#fff 12%),var(--cv) 45%,color-mix(in srgb,var(--cv) 100%,#000 45%));
+ box-shadow:0 24px 30px -18px #000d,0 1px 0 #ffffff26 inset}
+.bk::before{width:20px;background:radial-gradient(circle,#f1e2b4 0 3px,#9c7b34 4px 5px,transparent 6px) center top/20px 40px repeat-y,#0000004d}
+.bk::after{content:'';position:absolute;inset:7px 7px 7px 28px;border:1px dashed #e7cf9466;border-radius:7px;pointer-events:none}
+.bk:hover,.bk:focus-visible{transform:translateY(-5px)}
+.bk .lb{background:#0000005c;border:1px solid #e7cf9499;border-radius:6px;margin:auto 14px 18px 8px;padding:10px 10px 11px;width:auto;color:#f3e7c4;box-shadow:none;backdrop-filter:blur(2px);position:relative;z-index:1}
+.bk .lb b{font:600 1rem/1.15 Fraunces,Georgia,serif}
+.bk .lb small{font:400 .64rem 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#d9cfb0}
+.bk .lb i{height:2px;background:linear-gradient(90deg,#e7cf94 var(--w),#ffffff26 var(--w))}
+.bk .ed{top:10px;right:10px;width:28px;height:28px;background:#0009;color:#e7cf94;border:1px solid #e7cf9466;z-index:2}
+.bk.add{background:transparent;border:1px dashed var(--line);box-shadow:none;color:var(--mut);padding:10px}
+.bk.add::before,.bk.add::after{display:none}
+/* fichário aberto */
+.binder{--lc:#3a2a24;background:var(--noise),linear-gradient(160deg,color-mix(in srgb,var(--lc) 100%,#fff 10%),var(--lc) 42%,color-mix(in srgb,var(--lc) 100%,#000 38%));border-radius:6px 16px 16px 6px;padding:18px;box-shadow:0 34px 50px -26px #000d,0 1px 0 #ffffff26 inset}
+.binder::after{inset:8px;border:1.5px dashed color-mix(in srgb,#e7cf94 55%,transparent);border-radius:12px}
+@media(min-width:700px){.binder::before{background:radial-gradient(circle,#f1e2b4 0 5px,#9c7b34 6px 8px,#33260c 9px 11px,transparent 12px) center top/30px 74px repeat-y}}
+.pg{background:var(--page);border:1px solid var(--line);border-radius:8px;box-shadow:0 1px 0 #ffffff12 inset,0 12px 26px -16px #000b;padding:12px;gap:9px}
+.slot{border-radius:6px;border:1px dashed color-mix(in srgb,var(--fg) 16%,transparent);background:linear-gradient(160deg,color-mix(in srgb,var(--fg) 5%,transparent),transparent 55%),var(--slot);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--bg) 45%,transparent);transition:transform .18s,box-shadow .18s,border-color .18s}
+.slot::before{background:linear-gradient(115deg,transparent 40%,#ffffff12 48%,transparent 56%)}
+.slot:not(.have) .n{position:absolute;top:6px;left:8px;font:500 .78rem 'IBM Plex Mono',monospace;opacity:.5}
+.slot:not(.have)::after{display:none}
+.slot:not(.have):hover{transform:none;border-color:var(--gold)}
+.slot.have{border:1px solid color-mix(in srgb,var(--g2,var(--gold)) 55%,#000);background:linear-gradient(165deg,#262932,#15171c);color:#ebe8e0;box-shadow:0 10px 20px -10px #000e,0 0 0 1px #0007}
+.slot .tag{font:500 .62rem/1.15 Inter,sans-serif;background:linear-gradient(transparent,#000d)}
+.slot .no{font:500 .66rem 'IBM Plex Mono',monospace}
+.slot .st{color:var(--gold2)}
+.cn{font:italic 400 .64rem Fraunces,Georgia,serif}
+.ph2{inset:5px;padding:10px 6px 8px;justify-content:center;align-items:center;gap:3px;text-align:center;border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);border-radius:4px;background:radial-gradient(120% 80% at 50% 0,#ffffff0d,transparent),#12141a;color:#e9e4d6}
+.ph2 b{font:600 .82rem/1.15 Fraunces,Georgia,serif;color:#f1ead7}
+.ph2 span{font:400 .56rem/1.2 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#b9b3a1}
+.ph2 span:nth-of-type(1){color:var(--gold2);font-weight:500;font-size:.66rem}
+.qtd{background:var(--gold);color:#17130a;font:600 .66rem 'IBM Plex Mono',monospace;border-radius:8px;padding:1px 6px}
+.cond{position:absolute;left:4px;bottom:4px;max-width:72%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;z-index:4;background:#000c;color:var(--gold2);font:500 .56rem 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:1px 6px}
+.nav button{width:46px;height:40px;border-radius:10px;font-size:1rem}
+#pgi{font:500 .76rem 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--mut);background:none;border:0}
+/* janelas */
+dialog{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:16px;box-shadow:0 40px 80px -24px #000e;padding:20px}
+dialog::backdrop{background:#05060acc;backdrop-filter:blur(6px)}
+dialog>b:first-child{display:block;font:500 1.2rem Fraunces,Georgia,serif;margin-bottom:6px}
+dialog label{font:500 .66rem Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.sg b{font:500 1.3rem Fraunces,Georgia,serif;color:var(--gold)}
+.sbar i{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.tc b{font:500 .78rem/1.2 Fraunces,Georgia,serif}.tc small{font-family:'IBM Plex Mono',monospace}
+#toast{background:var(--panel);color:var(--fg);border:1px solid var(--gold);border-radius:12px;font:500 .84rem Inter,sans-serif;box-shadow:0 18px 40px -16px #000}
+.brilho{position:fixed;inset:0;z-index:30;pointer-events:none;background:radial-gradient(60% 40% at 50% 45%,#e7cf9488,transparent 70%);animation:brilho 1.5s ease-out forwards}
+@keyframes brilho{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <h1><span class="ball"></span> Meu Fichário de Cartas</h1>
+    <h1 class="wm">Fichário<small>Arquivo de coleção</small></h1>
     <div class="row" style="margin:0">
       <button id="back">← Estante</button><b id="bt"></b>
       <select id="sel" hidden aria-label="Fichário"></select>
-      <button id="scan" class="p" hidden>📷 Escanear</button>
-      <button id="new" class="p">+ Fichário</button>
-      <button id="bst" aria-label="Estatísticas">📊</button><button id="bdes" aria-label="Lista de desejos">♡</button><button id="btema" aria-label="Tema">🌓</button><button id="bajuda" aria-label="Ajuda">❓</button><button id="data" aria-label="Dados">⚙️</button>
+      <button id="scan" class="p" hidden>Escanear</button>
+      <button id="new" class="p">Novo fichário</button>
+      <button class="ic" id="bst" aria-label="Estatísticas" title="Estatísticas"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-6M22 20H2"/></svg></button><button class="ic" id="bdes" aria-label="Lista de desejos" title="Lista de desejos"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button><button class="ic" id="btema" aria-label="Tema" title="Tema">◐</button><button class="ic" id="bajuda" aria-label="Ajuda" title="Ajuda"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.7M12 17h.01"/></svg></button><button class="ic" id="data" aria-label="Dados e backup" title="Dados e backup"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
     </div>
   </div>
-  <p id="shl">Sua estante: toque num fichário para abrir ou crie um novo para separar suas cartas.</p>
+  <p id="shl">Sua estante. Toque num fichário para abri-lo ou crie um novo para separar suas coleções.</p>
   <div id="shelf"></div>
   <div style="margin-top:14px">
     <div class="stat"><span id="cnt"></span><span id="lvl"></span><span id="pct"></span></div>
@@ -176,8 +256,8 @@ body:not(.sh) #new{display:none}
     <button class="chip" data-f="have">Tenho</button>
     <button class="chip" data-f="miss">Faltam</button>
     <button class="chip" data-f="dup">Repetidas</button>
-    <button id="kbtn">📋 Catálogo</button>
-    <button id="tbtn" class="p">🔎 Buscar cartas</button>
+    <button id="kbtn">Catálogo</button>
+    <button id="tbtn" class="p">Buscar cartas</button>
   </div>
   <div class="row" style="margin-top:0"><label style="font-size:.9rem;color:var(--mut)"><input type="checkbox" id="quick" style="width:auto"> Toque rápido (marca/desmarca sem abrir)</label></div>
   <div class="binder" id="binder"></div>
@@ -198,15 +278,17 @@ body:not(.sh) #new{display:none}
   <div class="row" style="margin:0"><div style="flex:1"><label for="dcty">Tipo</label><select id="dcty"></select></div>
   <div style="flex:1"><label for="dcr">Raridade</label><select id="dcr"><option value="0">—</option><option value="1">★ Comum/Incomum</option><option value="2">★★ Rara/Holo</option><option value="3">★★★ Ultra/Secreta</option></select></div></div>
   <label for="dcq">Quantidade (repetidas)</label><input id="dcq" type="number" min="1" max="999" value="1">
+  <div class="row" style="margin:0"><div style="flex:1"><label for="dce">Estado</label><select id="dce"><option value="">—</option><option value="M">Mint (M)</option><option value="NM">Near Mint (NM)</option><option value="LP">Levemente jogada (LP)</option><option value="MP">Moderadamente jogada (MP)</option><option value="HP">Muito jogada (HP)</option><option value="D">Danificada (D)</option></select></div>
+  <div style="flex:1"><label for="dca">Acabamento</label><select id="dca"><option value="">Normal</option><option>Holo</option><option>Reverse holo</option><option>Foil</option><option>Arte completa</option><option>1ª edição</option><option>Promo</option></select></div></div>
   <label>Imagem: só foto sua. Sem foto, o fichário mostra os dados da carta.</label>
   <div class="ph"><div class="pv" id="pv"></div>
-    <div class="btns" style="margin:0"><button id="fb">📷 Minha foto</button><button id="fx">Remover</button><button id="dcf">🔎 Achar no catálogo</button></div>
+    <div class="btns" style="margin:0"><button id="fb">Minha foto</button><button id="fx">Remover</button><button id="dcf">Achar no catálogo</button></div>
     <input type="file" id="ff" accept="image/*" hidden></div>
   <div class="btns"><button class="p" id="dcy">Tenho ✓</button><button id="dcx">Limpar slot</button><button id="dcc">Fechar</button></div>
   <p style="margin:12px 0 0;font-size:.85rem"><a id="lk" target="_blank" rel="noopener noreferrer">Ver esta carta no Google Imagens ↗</a></p>
 </dialog>
 
-<dialog id="ds"><b>📷 Escanear fichário</b>
+<dialog id="ds"><b>Escanear fichário</b>
   <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Fotografe uma página do fichário por vez, de frente, reta e com boa luz. O Claude lê as cartas e preenche nome, tipo e número. As fotos são enviadas ao Claude só para essa leitura.</p>
   <label for="sm">Como numerar as cartas</label>
   <select id="sm"><option value="p">Pelo número impresso na carta (ex.: 025/165)</option><option value="o">Pela posição na página</option></select>
@@ -220,7 +302,7 @@ body:not(.sh) #new{display:none}
   <div class="btns" id="sim" hidden><button class="p" id="sib">Importar</button></div>
 </dialog>
 
-<dialog id="dt"><b>🔎 Buscar cartas</b>
+<dialog id="dt"><b>Buscar cartas</b>
   <label for="tjogo">Jogo</label><select id="tjogo"></select>
   <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Busque por nome, número e/ou coleção. As imagens vêm direto da fonte de cada jogo, sem cópia no seu site.</p>
   <label for="tn">Nome</label><input id="tn" placeholder="Ex.: Pikachu" autocomplete="off">
@@ -231,14 +313,14 @@ body:not(.sh) #new{display:none}
   <datalist id="tsets"></datalist>
   <label for="tslot">Colocar no slot nº</label><input id="tslot" type="number" min="1" placeholder="vazio = próximo slot livre">
   <label style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:.85rem"><input type="checkbox" id="tsf" style="width:auto"> Mostrar também cartas sem foto</label>
-  <div class="btns"><button class="p" id="tgo">Buscar</button><button id="tfoto">📷 Identificar por foto</button><button id="tcl">Fechar</button></div>
+  <div class="btns"><button class="p" id="tgo">Buscar</button><button id="tfoto">Identificar por foto</button><button id="tcl">Fechar</button></div>
   <p id="tst" style="font-size:.85rem;color:var(--mut)"></p>
   <div class="tg" id="tg"></div>
   <div class="btns" id="tmw" hidden><button id="tmore">Carregar mais</button></div>
   <p style="font-size:.75rem;color:var(--mut)"><span id="tatr"></span>. Site de fã, sem ligação com The Pokémon Company, Wizards of the Coast, Disney, Bandai ou Nintendo.</p>
 </dialog>
 
-<dialog id="dst"><b>📊 Estatísticas</b>
+<dialog id="dst"><b>Estatísticas</b>
   <div id="stb"></div>
   <div class="btns"><button class="p" id="stsh">Compartilhar resumo</button><button id="stcl">Fechar</button></div>
 </dialog>
@@ -253,7 +335,7 @@ body:not(.sh) #new{display:none}
   <div class="btns"><button id="tutp">Voltar</button><button class="p" id="tutn">Próximo</button><button id="tuts">Pular</button></div>
 </dialog>
 
-<dialog id="dk"><b>📋 Catálogo do fichário</b>
+<dialog id="dk"><b>Catálogo do fichário</b>
   <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Dados de cada carta (número, nome, coleção, raridade), guardados separados das imagens. Cole uma lista abaixo para preencher os nomes das cartas que faltam.</p>
   <div id="kt"></div>
   <label for="kj">Catálogo em texto (JSON, sem imagens)</label><textarea id="kj"></textarea>
@@ -275,7 +357,7 @@ body:not(.sh) #new{display:none}
   <label for="faltam">Cartas que faltam nesta coleção</label><textarea id="faltam" readonly></textarea>
   <label for="bk">Backup de todas as coleções (com fotos). Copie e guarde; cole aqui para restaurar.</label><textarea id="bk"></textarea>
   <p id="ultbk" style="font-size:.8rem;color:var(--mut);margin:4px 0"></p>
-  <div class="btns" style="margin-top:6px"><button class="p" id="bkf">⬇ Baixar backup (arquivo)</button><button id="rkf">⬆ Restaurar de arquivo</button><input type="file" id="rkfi" accept="application/json,.json" hidden></div>
+  <div class="btns" style="margin-top:6px"><button class="p" id="bkf">Baixar backup (arquivo)</button><button id="rkf">Restaurar de arquivo</button><input type="file" id="rkfi" accept="application/json,.json" hidden></div>
   <label for="erros">Relatório de erros (para suporte)</label><textarea id="erros" readonly></textarea>
   <div class="btns" style="margin-top:6px"><button id="cerr">Copiar relatório</button><button id="lerr">Limpar</button></div>
   <div class="btns"><button id="cp">Copiar backup</button><button id="imp">Restaurar</button><button class="danger" id="del">Apagar coleção</button><button id="ddc">Fechar</button></div>
@@ -304,7 +386,7 @@ function render(){
   page=Math.max(0,Math.min(page,pages-1));page-=page%step;
   $('#sel').innerHTML=S.sets.map((x,i)=>`<option value="${i}">${esc(x.name)}</option>`).join('');$('#sel').value=S.cur;
   const have=Object.keys(s.cards).filter(k=>k<=s.total).length,p=Math.round(have/s.total*100);
-  $('#cnt').textContent=`${have} de ${s.total} · faltam ${s.total-have}`;$('#pct').textContent=p+'%';$('#lvl').textContent=p>=100?'👑 Mestre Pokémon':p>=75?'🔥 Elite dos Quatro':p>=50?'⚡ Líder de ginásio':p>=25?'🎒 Colecionador':p>0?'🌱 Treinador iniciante':'🥚 Treinador novato';$('#fill').style.width=p+'%';
+  $('#cnt').textContent=`${have} de ${s.total} · faltam ${s.total-have}`;$('#pct').textContent=p+'%';$('#lvl').textContent=p>=100?'Mestre Pokémon':p>=75?'Elite dos Quatro':p>=50?'Líder de ginásio':p>=25?'Colecionador':p>0?'Treinador iniciante':'Treinador novato';$('#fill').style.width=p+'%';
   const cols=per===4?2:per===9?3:4,ql=q.toLowerCase();let h='';
   for(let pg=page;pg<page+step&&pg<pages;pg++){
     h+=`<div class="pg" style="--c:${cols}">`;
@@ -333,7 +415,7 @@ function openCard(n){
 }
 function upLink(){$('#lk').href='https://www.google.com/search?tbm=isch&q='+encodeURIComponent('carta pokémon '+($('#dcn').value||'')+' '+set().name)}
 $('#dcn').oninput=upLink;
-function toggle(n){const s=set();if(s.cards[n])delete s.cards[n];else{s.cards[n]={name:''};if(Object.keys(s.cards).length===s.total)toast('Coleção completa! 🎉')}save();render()}
+function toggle(n){const s=set();if(s.cards[n])delete s.cards[n];else{s.cards[n]={name:''};if(Object.keys(s.cards).length===s.total)toast('Coleção completa! ')}save();render()}
 $('#binder').onclick=e=>{const el=e.target.closest('.slot[data-n]');if(!el)return;const n=+el.dataset.n;$('#quick').checked?toggle(n):openCard(n)};
 $('#binder').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const el=e.target.closest('.slot[data-n]');if(el){e.preventDefault();openCard(+el.dataset.n)}}};
 $('#binder').onpointermove=e=>{const el=e.target.closest('.slot.have');if(!el||e.pointerType==='touch')return;const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;el.style.setProperty('--ry',(x-.5)*18+'deg');el.style.setProperty('--rx',(.5-y)*18+'deg');el.style.setProperty('--mx',x*100+'%');el.style.setProperty('--my',y*100+'%')};
@@ -345,7 +427,7 @@ $('#ff').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const W=260,H=364,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),k=Math.max(W/im.width,H/im.height),w=im.width*k,h=im.height*k;x.drawImage(im,(W-w)/2,(H-h)/2,w,h);img=c.toDataURL('image/jpeg',.72);$('#pv').style.backgroundImage=`url(${img})`};im.onerror=()=>toast('Não consegui ler esta imagem');im.src=r.result};r.readAsDataURL(f)};
 $('#fx').onclick=()=>{img='';$('#pv').style.backgroundImage=''};
 $('#dcy').onclick=()=>{const s=set(),had=!!s.cards[cur];s.cards[cur]={name:$('#dcn').value.trim(),type:$('#dcty').value,rare:+$('#dcr').value,img};
-  if(save()){$('#dc').close();if(!had&&Object.keys(s.cards).length===s.total)toast('Coleção completa! 🎉')}render()};
+  if(save()){$('#dc').close();if(!had&&Object.keys(s.cards).length===s.total)toast('Coleção completa! ')}render()};
 $('#dcx').onclick=()=>{const s=set();delete s.cards[cur];if(s.cat)delete s.cat[cur];save();$('#dc').close();render()};
 $('#dcc').onclick=()=>$('#dc').close();
 $('#prev').onclick=()=>go(-1);$('#next').onclick=()=>go(1);
@@ -360,7 +442,7 @@ $('#new').onclick=()=>$('#dn').showModal();$('#ncc').onclick=()=>$('#dn').close(
 $('#nok').onclick=()=>{S.sets.push({name:$('#nn').value.trim()||'Nova coleção',total:Math.max(1,Math.min(1500,+$('#nt').value||1)),per:+$('#np').value,cards:{}});
   S.cur=S.sets.length-1;page=0;$('#nn').value='';save();$('#dn').close();render()};
 $('#data').onclick=()=>{const s=set(),m=[];for(let i=1;i<=s.total;i++)if(!s.cards[i])m.push(i);
-  $('#faltam').value=m.length?m.join(', '):'Coleção completa! 🎉';$('#bk').value=JSON.stringify(S);$('#dd').showModal()};
+  $('#faltam').value=m.length?m.join(', '):'Coleção completa! ';$('#bk').value=JSON.stringify(S);$('#dd').showModal()};
 $('#ddc').onclick=()=>$('#dd').close();
 $('#cp').onclick=async()=>{try{await navigator.clipboard.writeText($('#bk').value);toast('Backup copiado')}catch(e){$('#bk').select();toast('Selecione e copie o texto manualmente')}};
 $('#imp').onclick=()=>{try{let d=JSON.parse($('#bk').value);if(d&&!d.sets&&typeof d.total==='number')d={cur:0,sets:[d]};
@@ -415,7 +497,7 @@ $('#sib').onclick=()=>{
   if(save()){$('#ds').close();toast(`${ok} cartas importadas`+(sk?` · ${sk} fora da numeração 1–${s.total}`:''));render()}
 };
 /* Scanner v2 + festa */
-function confetti(){const e=['✨','⭐','🎉','⚡','🔥','💧','🍃','🎴'];for(let i=0;i<34;i++){const s=document.createElement('span');s.className='cf';s.textContent=e[i%e.length];s.style.left=Math.random()*100+'vw';s.style.animationDelay=Math.random()*.8+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),3500)}}
+function confetti(){const e=['','','','','','','',''];for(let i=0;i<34;i++){const s=document.createElement('span');s.className='cf';s.textContent=e[i%e.length];s.style.left=Math.random()*100+'vw';s.style.animationDelay=Math.random()*.8+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),3500)}}
 function prep(file){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,2000/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(b=>ok({c,b}),'image/jpeg',.88)};im.onerror=no;im.src=r.result};r.onerror=no;r.readAsDataURL(file)})}
 function cropB(c,b,R,C,r,q){let[x,y,w,h]=Array.isArray(b)&&b.length===4&&b.every(v=>typeof v==='number')?b:[q/C,r/R,1/C,1/R];
   if(!(w>.04&&h>.04&&x>-.03&&y>-.03&&x+w<1.03&&y+h<1.03))[x,y,w,h]=[q/C,r/R,1/C,1/R];
@@ -434,7 +516,7 @@ $('#sgo').onclick=async()=>{
   ctl=new AbortController();SCN=[];SCT=0;$('#sl').innerHTML='';$('#sim').hidden=true;$('#sat').hidden=true;$('#sgo').hidden=true;$('#sst').hidden=false;pr.hidden=false;pr.max=fs.length;pr.value=0;
   try{
     for(let i=0;i<fs.length;i++){
-      $('#sp').textContent=`🔍 Lendo página ${i+1} de ${fs.length}…`;
+      $('#sp').textContent=`Lendo página ${i+1} de ${fs.length}…`;
       try{
         const {c,b}=await prep(fs[i]);
         const d=await SM.json(PROMPT,{images:[b],signal:ctl.signal,cache:false});
@@ -454,11 +536,11 @@ $('#sgo').onclick=async()=>{
   SCN.forEach(c=>{if(c.n>=1){if(seen.has(c.n)){c.on=false;c.bd='repetida'}else if(s.cards[c.n]){c.bd='já tem';c.on=!s.cards[c.n].img}seen.add(c.n)}});
   SCT=+Object.keys(tot).sort((a,b)=>tot[b]-tot[a])[0]||0;
   if(byNum&&SCT&&SCT!==s.total){$('#sat').textContent=`Ajustar coleção para ${SCT} cartas (total impresso)`;$('#sat').hidden=false}
-  $('#sp').textContent=fatal||(SCN.length?`✅ ${SCN.length} cartas lidas${bad?` · ${bad} foto(s) falharam`:''}. Confira e importe:`:'Nenhuma carta encontrada. Tente uma foto mais reta e com mais luz.');
+  $('#sp').textContent=fatal||(SCN.length?`${SCN.length} cartas lidas${bad?` · ${bad} foto(s) falharam`:''}. Confira e importe:`:'Nenhuma carta encontrada. Tente uma foto mais reta e com mais luz.');
   pr.hidden=true;$('#sgo').hidden=false;$('#sst').hidden=true;showScan();
 };
 /* Estante de fichários */
-const COV=['#d93a32','#3b4cca','#e6a800','#2e9b4e','#8a4fd1','#e76fb0','#2f2c3d','#1b9aa6'];
+const COV=['#7b2d2d','#27405f','#8a6a2c','#2f5a46','#5b3a6b','#8a4a5a','#3a3f47','#2b5a63'];
 let view='shelf',ei=-1,nc=0;
 function drawShelf(){
   $('#shelf').innerHTML=S.sets.map((s,i)=>{const h=Object.keys(s.cards).filter(k=>k<=s.total).length,p=s.total?Math.round(h/s.total*100):0,c=COV[(s.color!==undefined?s.color:i)%COV.length];
@@ -478,7 +560,7 @@ function openEd(i){ei=i;const s=i<0?{name:'',total:150,per:9}:S.sets[i];
   $('#dnt').textContent=i<0?'Novo fichário':'Editar fichário';$('#nn').value=s.name;$('#nn').placeholder='Ex.: Escarlate e Violeta 151';$('#nt').value=s.total;$('#np').value=s.per;
   $('#nok').textContent=i<0?'Criar':'Salvar';$('#ndel').hidden=i<0;swatches();$('#dn').showModal()}
 $('#nok').onclick=()=>{const o={name:$('#nn').value.trim()||'Novo fichário',total:Math.max(1,Math.min(1500,+$('#nt').value||1)),per:+$('#np').value,color:nc};
-  if(ei<0){S.sets.push({...o,cards:{}});S.cur=S.sets.length-1;page=0;view='binder';toast('Fichário criado! 📒')}else Object.assign(S.sets[ei],o);
+  if(ei<0){S.sets.push({...o,cards:{}});S.cur=S.sets.length-1;page=0;view='binder';toast('Fichário criado! ')}else Object.assign(S.sets[ei],o);
   save();$('#dn').close();render()};
 $('#ndel').onclick=()=>{if(!confirm('Apagar este fichário e todas as cartas dele?'))return;S.sets.splice(ei,1);
   if(!S.sets.length)S.sets.push({name:'Meu fichário',total:150,per:9,color:0,cards:{}});
@@ -525,7 +607,7 @@ function openCard(n){const s=set(),c=s.cards[n]||{},i=info(s,n);cur=n;img=c.img|
   $('#dct').textContent=`Carta nº ${n} de ${s.total}`;$('#dcn').value=i.name;$('#dcc2').value=c.col||'';$('#dcc2').placeholder=s.colecao||s.name;$('#dcty').value=i.type;$('#dcr').value=i.rare;
   $('#pv').style.backgroundImage=img?`url(${img})`:'';$('#dc').showModal();upLink()}
 $('#dcy').onclick=()=>{const s=set(),had=!!s.cards[cur];s.cards[cur]={name:$('#dcn').value.trim(),col:$('#dcc2').value.trim(),type:$('#dcty').value,rare:+$('#dcr').value,img,url:(s.cards[cur]||{}).url};
-  if(save()){$('#dc').close();if(!had&&Object.keys(s.cards).length===s.total)toast('Coleção completa! 🎉')}render()};
+  if(save()){$('#dc').close();if(!had&&Object.keys(s.cards).length===s.total)toast('Coleção completa! ')}render()};
 function openK(){const s=set();let r='';const out=[];
   for(let n=1;n<=s.total;n++){const i=info(s,n),has=!!s.cards[n];r+=`<tr><td>${n}</td><td>${esc(i.name||'—')}</td><td>${esc(i.col)}</td><td>${RL[i.rare]||'—'}</td><td>${has?'✓':'—'}</td></tr>`;
     if(i.name||i.rare||i.type||has)out.push({numero:n,nome:i.name,colecao:i.col,raridade:RL[i.rare].replace(/[★ ]/g,''),tipo:i.type})}
@@ -540,7 +622,7 @@ const oe=openEd;openEd=function(i){oe(i);$('#ncol').value=i<0?'':(S.sets[i].cole
 const ok0=$('#nok').onclick;$('#nok').onclick=()=>{const v=$('#ncol').value.trim(),i=ei;ok0();const t=i<0?S.sets[S.sets.length-1]:S.sets[i];if(t){t.colecao=v;save();render()}};
 render();
 </script>
-<script type="module" src="busca.js?v=8"></script>
-<script type="module" src="extras.js?v=8"></script>
+<script type="module" src="busca.js?v=9"></script>
+<script type="module" src="extras.js?v=9"></script>
 </body>
 </html>
