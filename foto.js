@@ -9,6 +9,7 @@
 //    com texto escuro e claro, binarização local (Otsu) e votação entre as leituras;
 //  - corrige confusões comuns (O→0, I→1, S→5, B→8) e valida o formato 005/225 ou XY123;
 //  - se o nome vier errado, tenta variações e ordena os resultados por semelhança de nome.
+import { lerNumeroTxt, lerNome, variantes } from './util.js?v=8';
 const CDN = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
 let lib, worker, pesquisar, abrirBusca, ranquear, destino = null, rodadas = 0;
 
@@ -71,29 +72,6 @@ async function ocr(w, c, reg, inv, lista) {
   const { data } = await w.recognize(f);
   return { texto: data.text || '', conf: data.confidence || 0 };
 }
-const DIG = { O: '0', Q: '0', D: '0', I: '1', L: '1', '|': '1', S: '5', B: '8', Z: '2' };
-const fixDig = s => s.replace(/[OQDIL|SBZ]/g, c => DIG[c]);
-// "005/225" -> número e total; "XY123" (código especial) -> só o código.
-function lerNumeroTxt(t) {
-  t = t.toUpperCase().replace(/[^A-Z0-9\/| ]/g, ' ').replace(/\s+/g, ' ');
-  for (const x of t.matchAll(/([A-Z0-9|]{1,7})\s*\/\s*([A-Z0-9|]{2,4})/g)) {
-    if (!/^[0-9OQDIL|SBZ]{2,4}$/.test(x[2])) continue;
-    const pre = x[1].match(/^([A-Z]{0,6}?)([0-9OQDIL|SBZ]{1,4})$/);
-    if (!pre) continue;
-    const num = pre[1] + fixDig(pre[2]);
-    if (/\d/.test(num)) return { num, tot: fixDig(x[2]) };
-  }
-  const m = t.match(/\b(XY|SM|SWSH|SVP|SV|TG|GG|BW|DP|HGSS|NP|PR|RC|SMP|BWP|DPP)\s?([0-9OIL]{1,4})\b/);
-  return m ? { num: m[1] + fixDig(m[2]), tot: '' } : null;
-}
-const RUIDO = /^(BASIC|BASICO|BÁSICO|STAGE|FASE|HP|PS|TRAINER|TREINADOR|ITEM|SUPPORTER|APOIADOR|POKEMON|POKÉMON|EVOLVES|EVOLUI|FROM|DE)$/i;
-function lerNome(t) {
-  for (const linha of t.split('\n')) {
-    const p = linha.replace(/[^A-Za-zÀ-ÿ'’\-. ]/g, ' ').split(/\s+/).filter(x => x.length > 1 && !RUIDO.test(x));
-    if (p.join('').length >= 3) return p.slice(0, 3).join(' ');
-  }
-  return '';
-}
 const REG_NUM = [[.02, .885, .96, .105], [.02, .90, .46, .09], [.52, .90, .46, .09], [.02, .86, .96, .10]];
 const REG_NOME = [[.03, .02, .74, .12], [.03, .045, .62, .095]];
 const LNUM = '0123456789/ABCDEFGHIJKLMNOPQRSTUVWXYZ|';
@@ -138,7 +116,6 @@ async function lerCarta(w, c, st) {
   } catch (e) { if (e.codigo !== 'LIMITE') throw e; }
   return melhor || { num: '', tot: '', nome: '' };
 }
-const variantes = n => { const p = n.split(' '); return [...new Set([n, p[0], p[0].slice(0, 5), p[0].slice(0, 4)])].filter(x => x.length >= 3); };
 
 const doDataUrl = u => new Promise((ok, no) => {
   const im = new Image();

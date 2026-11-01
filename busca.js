@@ -1,12 +1,13 @@
 // Liga o fichário (index.html) às fontes de cartas. Para trocar ou acrescentar
 // uma fonte, crie um adaptador (formato em catalogo.js) e registre-o aqui.
-import { criarLimitador, criarHttp } from './infra.js?v=7';
-import { criarFonteTcgdex } from './tcgdex.js?v=7';
-import { criarFonteScryfall } from './scryfall.js?v=7';
-import { criarFonteLorcast } from './lorcast.js?v=7';
-import { criarFonteOptcg } from './optcg.js?v=7';
-import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=7';
-import { iniciarFoto } from './foto.js?v=7';
+import { criarLimitador, criarHttp } from './infra.js?v=8';
+import { criarFonteTcgdex } from './tcgdex.js?v=8';
+import { criarFonteScryfall } from './scryfall.js?v=8';
+import { criarFonteLorcast } from './lorcast.js?v=8';
+import { criarFonteOptcg } from './optcg.js?v=8';
+import { registrarFonte, usarFonte, buscar, colecoes, nomes, fonteAtiva } from './catalogo.js?v=8';
+import { iniciarFoto } from './foto.js?v=8';
+import { sim } from './util.js?v=8';
 
 // Limites conservadores por fonte. `intervalo` = espera mínima entre requisições (ms).
 // Scryfall: a busca aceita ~2/s e o resto ~10/s; imagens (*.scryfall.io) não têm limite.
@@ -68,7 +69,7 @@ async function trocarJogo(id, salvar) {
   res = []; pag = 1;
   $('#tg').innerHTML = ''; $('#tcol').value = ''; $('#tsug').innerHTML = ''; $('#tmw').hidden = true;
   const a = fonteAtiva().atribuicao;
-  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v7`; // número da versão: confirma que os arquivos novos carregaram
+  $('#tatr').innerHTML = `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.texto)}</a> · v8`; // número da versão: confirma que os arquivos novos carregaram
   await carregarColecoes();
 }
 
@@ -136,15 +137,6 @@ const mostrarSemFoto = () => $('#tsf').checked;
 const visiveis = () => res.filter(c => mostrarSemFoto() || c.imagem).length;
 let auto = 0, rank = false;
 // Ordena os resultados pela semelhança com o nome lido na foto (tolera 1 ou 2 letras erradas).
-const limpo = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
-function lev(a, b) {
-  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
-  for (let j = 1; j <= b.length; j++) d[0][j] = j;
-  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
-    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-  return d[a.length][b.length];
-}
-const sim = (a, b) => { a = limpo(a); b = limpo(b); if (!a || !b) return 0; if (a.includes(b) || b.includes(a)) return .9; return 1 - lev(a, b) / Math.max(a.length, b.length); };
 function ranquear(nome) {
   if (res.length < 2) return;
   res.forEach(c => { c.sim = sim(nome, c.nome) + (c.imagem ? .05 : 0); });
@@ -204,7 +196,7 @@ function desenhar() {
   $('#tg').innerHTML = res.map((c, i) => ({ c, i })).filter(x => mostrarSemFoto() || x.c.imagem).map(({ c, i }) => `<div class="tc">
     ${c.imagem ? `<img src="${esc(c.imagem)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ni">sem imagem</div>'}
     ${rank && i === 0 && c.sim >= .55 ? '<small style="color:var(--ok)">✔ mais provável</small>' : ''}<b>${esc(c.nome)}</b><small>nº ${esc(c.numero)}${c.lingua === 'en' ? ' · EN' : ''}</small>${c.fonte === 'tcgdex' || c.fonte === 'optcg' ? `<small style="color:var(--mut)">${esc(c.id)}</small>` : ''}
-    <button class="p" data-i="${i}" data-t="1">Tenho ✓</button><button data-i="${i}" data-t="0">Só catálogo</button></div>`).join('');
+    <button class="p" data-i="${i}" data-t="1">Tenho ✓</button><button data-i="${i}" data-t="0">Só catálogo</button><button data-i="${i}" data-t="2" aria-label="Adicionar à lista de desejos">♡</button></div>`).join('');
 }
 // Imagem que falhar vira o espaço reservado com os dados da carta.
 $('#tg').addEventListener('error', e => { if (e.target.tagName === 'IMG') e.target.replaceWith(Object.assign(document.createElement('div'), { className: 'ni', textContent: 'sem imagem' })); }, true);
@@ -215,11 +207,18 @@ $('#binder').addEventListener('error', e => {
 
 const livre = s => { for (let i = 1; i <= s.total; i++) if (!s.cards[i]) return i; return s.total + 1; };
 
+function addDesejo(c) {
+  S.wish = S.wish || [];
+  if (S.wish.some(w => w.chave === chave(c))) { aviso('Já está na lista de desejos.'); return; }
+  S.wish.push({ chave: chave(c), nome: c.nome, numero: c.numero, col: c.colecao?.nome || '', url: c.imagem, fonte: c.fonte });
+  save(); aviso(`${c.nome} entrou na lista de desejos ♡`);
+}
 // A carta vai para o slot que VOCÊ escolher (campo "Colocar no slot"); vazio = próximo slot livre.
 // O número impresso na carta (ex.: 005/225) fica guardado só como informação.
 $('#tg').onclick = async e => {
   const b = e.target.closest('button[data-i]'); if (!b || b.disabled) return;
   const c = res[+b.dataset.i], tenho = b.dataset.t === '1', s = set();
+  if (b.dataset.t === '2') { addDesejo(c); return; }
   let n = parseInt($('#tslot').value, 10);
   const manual = n >= 1;
   if (!manual) n = livre(s);

@@ -1,44 +1,35 @@
-# Fichário Pokémon (versão hospedável)
+# Fichário de cartas (versão hospedável)
 
-Esta pasta é o seu fichário com a busca de cartas do TCGdex. Ela só funciona
-quando está hospedada num endereço próprio, porque a página precisa acessar a
-internet para buscar as cartas.
+Pokémon, Magic, Lorcana e One Piece, com busca por nome, número e coleção.
+Só funciona hospedado num endereço próprio (GitHub Pages, Netlify...).
 
 ## Arquivos (envie todos, na mesma pasta)
 
 - `index.html`: o fichário
-- `busca-tcgdex.js`: liga o fichário à fonte de cartas
-- `tcgdex.js`: conversa com o TCGdex
+- `busca.js`: tela de busca e escolha do jogo
 - `catalogo.js`: registro de fontes (permite trocar de fonte depois)
 - `infra.js`: cache, limite de requisições e tentativas automáticas
+- `util.js`: funções puras (leitura de números e nomes, semelhança), com testes
+- `foto.js`: identificação de carta por foto (OCR no navegador)
+- `extras.js`: tema, repetidas, desejos, estatísticas, backup em arquivo, tutorial
+- `sw.js`, `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon.png`: instalação como aplicativo
+- `tcgdex.js` (Pokémon), `scryfall.js` (Magic), `lorcast.js` (Lorcana), `optcg.js` (One Piece): uma fonte por arquivo
 
-## Publicar de graça no GitHub Pages
+Se o seu repositório ainda tem o `busca-tcgdex.js`, pode apagar: não é mais usado.
 
-1. Crie uma conta em github.com e clique em **New repository**. Dê um nome (ex.: `ficharios`) e marque **Public**.
-2. Em **Add file → Upload files**, arraste os 5 arquivos e clique em **Commit changes**.
-3. Vá em **Settings → Pages**. Em **Branch**, escolha `main` e a pasta `/ (root)`, e salve.
-4. Espere cerca de 1 minuto. O endereço aparece na mesma tela: `https://SEU-USUARIO.github.io/ficharios/`.
-
-(Alternativa: no netlify.com, use **Add new site → Deploy manually** e arraste a pasta.)
-
-## Testar no seu computador
-
-Na pasta, rode `python3 -m http.server` e abra `http://localhost:8000`.
-Abrir o `index.html` com duplo clique não funciona (os módulos JavaScript exigem um servidor).
-
-## Levar o que você já cadastrou
-
-Os dados ficam guardados no navegador, por endereço. O novo endereço começa vazio.
-1. No fichário atual, abra um fichário e toque em ⚙️. Copie o texto do **Backup**.
-2. No endereço novo, abra um fichário, toque em ⚙️, cole o texto e toque em **Restaurar**.
+## Publicar no GitHub Pages
+Repositório → **Add file → Upload files** (os arquivos com o mesmo nome são substituídos) → **Commit changes**.
+Depois, **Settings → Pages → Deploy from a branch → main / (root)**.
 
 ## Limites e termos
+- Cada fonte tem seus limites em `busca.js` (tabela `LIM`). Confira as regras no site de cada uma: tcgdex.dev, scryfall.com/docs/api, lorcast.com/docs/api, optcgapi.com/documentation.
+- Scryfall: não corte nem distorça as imagens, mantenha o crédito e não cobre acesso aos dados.
+- A OPTCG API é um projeto pessoal e não oficial; use com moderação.
+- As imagens vêm do endereço informado por cada fonte e não são copiadas para a sua hospedagem.
+- Mantenha as atribuições e o aviso de site de fã.
 
-- O código usa por padrão 30 requisições por minuto e 2.000 por dia por navegador, com cache. Ajuste em `busca-tcgdex.js` depois de conferir as regras em https://tcgdex.dev.
-- As imagens vêm do endereço que o TCGdex informa e não são copiadas para a sua hospedagem. Confira nos termos do TCGdex o que é permitido para o seu uso.
-- O site mostra a atribuição ao TCGdex e o aviso de que é um site de fã. Mantenha esses textos.
+## Trocar ou acrescentar uma fonte
+Crie um arquivo no formato descrito no topo de `catalogo.js` e registre-o em `busca.js`.
 
-## Trocar de fonte no futuro
-
-Crie um arquivo novo no formato descrito no topo de `catalogo.js` e troque a linha
-`registrarFonte(...)` em `busca-tcgdex.js`.
+## Testes automáticos (opcional, para quem desenvolve)
+Com o Node 18 ou mais novo, na pasta do projeto: `npm test`. Os testes cobrem a leitura de números e nomes e o mapeamento de cada fonte de cartas, usando respostas de exemplo (sem internet).

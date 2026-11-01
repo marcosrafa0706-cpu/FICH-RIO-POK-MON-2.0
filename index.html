@@ -2,8 +2,23 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Meu Fichário Pokémon</title>
+<title>Meu Fichário de Cartas</title>
+<meta name="description" content="Fichário digital para organizar e acompanhar suas coleções de cartas.">
+<meta name="theme-color" content="#c8312b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fichário">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>
+// Tema salvo (evita piscar) e registro simples de erros para suporte (⚙️ > Relatório de erros).
+(function(){try{var t=localStorage.getItem('fichario-tema');if(t)document.documentElement.dataset.theme=t}catch(e){}
+function reg(m){try{var l=JSON.parse(localStorage.getItem('fichario-erros')||'[]');l.push({t:new Date().toISOString(),m:String(m).slice(0,300)});localStorage.setItem('fichario-erros',JSON.stringify(l.slice(-20)))}catch(e){}}
+addEventListener('error',function(e){reg(e.message+' ('+String(e.filename||'').split('/').pop()+':'+e.lineno+')')});
+addEventListener('unhandledrejection',function(e){reg('Promessa: '+(e.reason&&e.reason.message||e.reason))})})();
+</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
@@ -119,18 +134,34 @@ body:not(.sh) #new{display:none}
 .tc img,.tc .ni{width:100%;aspect-ratio:5/7;object-fit:cover;border-radius:6px;background:var(--slot)}
 .tc .ni{display:flex;align-items:center;justify-content:center;color:var(--mut)}
 .tc button{padding:4px 6px;font-size:.72rem;border-radius:8px}
+
+/* ---- v8: identidade neutra, repetidas, estatísticas, desejos, acessibilidade ---- */
+.ball{background:linear-gradient(135deg,#ffcb05,#e6a800);border:2px solid #7a5b00}.ball::after{display:none}
+.bar i::after{background:linear-gradient(135deg,#ffcb05,#e6a800);border:2px solid #7a5b00}
+.slot:not(.have)::after{border-radius:8px;transform:rotate(45deg);width:34%;background:#0000000d;border:2px solid #0001}
+.sh #data{display:inline-block!important}
+.qtd{position:absolute;bottom:4px;right:4px;background:#000c;color:#fff;border-radius:10px;padding:1px 7px;font-size:.72rem;z-index:4}
+.mut{color:var(--mut);font-size:.9rem}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0;text-align:center}.sg div{background:var(--bg);border-radius:10px;padding:8px 2px}.sg b{display:block;font-size:1.2rem}.sg small{color:var(--mut);font-size:.68rem}
+#dst h4{margin:14px 0 4px;font-size:.9rem}#stb{max-height:55vh;overflow:auto}
+.sb{display:grid;grid-template-columns:minmax(80px,1fr) 2fr auto;gap:8px;align-items:center;font-size:.8rem;margin:4px 0}.sb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sbar{height:10px;background:var(--line);border-radius:6px;overflow:hidden}.sbar i{display:block;height:100%;background:var(--ok)}
+#dwl{max-height:55vh;overflow:auto;margin-top:8px}.wi{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.wi img,.wi .wp{width:44px;aspect-ratio:5/7;object-fit:cover;border-radius:4px;background:var(--slot);flex:none}.wt{flex:1;min-width:0;display:flex;flex-direction:column}.wt small{color:var(--mut)}
+.wi button{padding:4px 9px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <h1><span class="ball"></span> Meu Fichário Pokémon</h1>
+    <h1><span class="ball"></span> Meu Fichário de Cartas</h1>
     <div class="row" style="margin:0">
       <button id="back">← Estante</button><b id="bt"></b>
       <select id="sel" hidden aria-label="Fichário"></select>
       <button id="scan" class="p" hidden>📷 Escanear</button>
       <button id="new" class="p">+ Fichário</button>
-      <button id="data" aria-label="Dados">⚙️</button>
+      <button id="bst" aria-label="Estatísticas">📊</button><button id="bdes" aria-label="Lista de desejos">♡</button><button id="btema" aria-label="Tema">🌓</button><button id="bajuda" aria-label="Ajuda">❓</button><button id="data" aria-label="Dados">⚙️</button>
     </div>
   </div>
   <p id="shl">Sua estante: toque num fichário para abrir ou crie um novo para separar suas cartas.</p>
@@ -144,6 +175,7 @@ body:not(.sh) #new{display:none}
     <button class="chip on" data-f="all">Todas</button>
     <button class="chip" data-f="have">Tenho</button>
     <button class="chip" data-f="miss">Faltam</button>
+    <button class="chip" data-f="dup">Repetidas</button>
     <button id="kbtn">📋 Catálogo</button>
     <button id="tbtn" class="p">🔎 Buscar cartas</button>
   </div>
@@ -165,6 +197,7 @@ body:not(.sh) #new{display:none}
   <label for="dcc2">Coleção / expansão</label><input id="dcc2">
   <div class="row" style="margin:0"><div style="flex:1"><label for="dcty">Tipo</label><select id="dcty"></select></div>
   <div style="flex:1"><label for="dcr">Raridade</label><select id="dcr"><option value="0">—</option><option value="1">★ Comum/Incomum</option><option value="2">★★ Rara/Holo</option><option value="3">★★★ Ultra/Secreta</option></select></div></div>
+  <label for="dcq">Quantidade (repetidas)</label><input id="dcq" type="number" min="1" max="999" value="1">
   <label>Imagem: só foto sua. Sem foto, o fichário mostra os dados da carta.</label>
   <div class="ph"><div class="pv" id="pv"></div>
     <div class="btns" style="margin:0"><button id="fb">📷 Minha foto</button><button id="fx">Remover</button><button id="dcf">🔎 Achar no catálogo</button></div>
@@ -205,6 +238,21 @@ body:not(.sh) #new{display:none}
   <p style="font-size:.75rem;color:var(--mut)"><span id="tatr"></span>. Site de fã, sem ligação com The Pokémon Company, Wizards of the Coast, Disney, Bandai ou Nintendo.</p>
 </dialog>
 
+<dialog id="dst"><b>📊 Estatísticas</b>
+  <div id="stb"></div>
+  <div class="btns"><button class="p" id="stsh">Compartilhar resumo</button><button id="stcl">Fechar</button></div>
+</dialog>
+
+<dialog id="dw"><b>♡ Lista de desejos</b>
+  <div id="dwl"></div>
+  <div class="btns"><button id="dwc">Copiar lista</button><button id="dwx">Fechar</button></div>
+</dialog>
+
+<dialog id="dtut"><b id="tuti"></b>
+  <p id="tutx" style="margin:10px 0"></p><p id="tutd" class="mut" style="text-align:center"></p>
+  <div class="btns"><button id="tutp">Voltar</button><button class="p" id="tutn">Próximo</button><button id="tuts">Pular</button></div>
+</dialog>
+
 <dialog id="dk"><b>📋 Catálogo do fichário</b>
   <p style="margin:8px 0;font-size:.85rem;color:var(--mut)">Dados de cada carta (número, nome, coleção, raridade), guardados separados das imagens. Cole uma lista abaixo para preencher os nomes das cartas que faltam.</p>
   <div id="kt"></div>
@@ -226,6 +274,10 @@ body:not(.sh) #new{display:none}
   <p style="font-size:.8rem;color:var(--mut)">As imagens vêm só das fotos que você mesmo tira. O site não copia imagens da internet.</p>
   <label for="faltam">Cartas que faltam nesta coleção</label><textarea id="faltam" readonly></textarea>
   <label for="bk">Backup de todas as coleções (com fotos). Copie e guarde; cole aqui para restaurar.</label><textarea id="bk"></textarea>
+  <p id="ultbk" style="font-size:.8rem;color:var(--mut);margin:4px 0"></p>
+  <div class="btns" style="margin-top:6px"><button class="p" id="bkf">⬇ Baixar backup (arquivo)</button><button id="rkf">⬆ Restaurar de arquivo</button><input type="file" id="rkfi" accept="application/json,.json" hidden></div>
+  <label for="erros">Relatório de erros (para suporte)</label><textarea id="erros" readonly></textarea>
+  <div class="btns" style="margin-top:6px"><button id="cerr">Copiar relatório</button><button id="lerr">Limpar</button></div>
   <div class="btns"><button id="cp">Copiar backup</button><button id="imp">Restaurar</button><button class="danger" id="del">Apagar coleção</button><button id="ddc">Fechar</button></div>
 </dialog>
 
@@ -488,6 +540,7 @@ const oe=openEd;openEd=function(i){oe(i);$('#ncol').value=i<0?'':(S.sets[i].cole
 const ok0=$('#nok').onclick;$('#nok').onclick=()=>{const v=$('#ncol').value.trim(),i=ei;ok0();const t=i<0?S.sets[S.sets.length-1]:S.sets[i];if(t){t.colecao=v;save();render()}};
 render();
 </script>
-<script type="module" src="busca.js?v=7"></script>
+<script type="module" src="busca.js?v=8"></script>
+<script type="module" src="extras.js?v=8"></script>
 </body>
 </html>
